@@ -5,7 +5,7 @@ with lib;
 let cfg = config.wireguard; in
 {
   options.wireguard = {
-    enable = lib.mkEnableOption "wireguard";
+    enable = mkEnableOption "wireguard";
     server = mkOption {
       type = with types; bool;
       default = cfg.hosts.${config.networking.hostName}.server;
@@ -22,6 +22,15 @@ let cfg = config.wireguard; in
           server = mkOption {
             type = types.bool;
             default = false;
+          };
+          endpoint = mkOption {
+            type = with types; nullOr str;
+            default = null;
+            # should not be null when server = true
+          };
+          persistentKeepalive = mkOption {
+            type = with types; nullOr int;
+            default = null;
           };
         };
       };
@@ -47,18 +56,26 @@ let cfg = config.wireguard; in
 
       wireguard = {
         enable = true;
-        interfaces.wg0 = {
-          ips = [ "${cfg.hosts.${config.networking.hostName}.ip}/24" ];
+        interfaces.wg0 = let hostName = config.networking.hostName; in {
+          ips = [ "${cfg.hosts."${hostName}".ip}/24" ];
           listenPort = 51820;
-          privateKeyFile = "${config.custom.secretsDir}/wireguard-key-${config.networking.hostName}";
-          peers = mkIf (!cfg.server) [
-            {
-              allowedIPs = [ "10.0.0.0/24" ];
-              publicKey = "${cfg.hosts.vps.publicKey}";
-              endpoint = "${config.hosting.serverIpv4}:51820";
-              persistentKeepalive = mkIf (config.networking.hostName == "rasp-pi") 25;
-            }
-          ];
+          privateKeyFile = "${config.custom.secretsDir}/wireguard-key-${hostName}";
+          peers =
+            let
+              serverPeers = attrsets.mapAttrsToList
+                (hostName: values:
+                  if values.server then
+                  {
+                    allowedIPs = [ "10.0.0.0/24" ];
+                    publicKey = values.publicKey;
+                    endpoint = "${values.endpoint}:51820";
+                    persistentKeepalive = values.persistentKeepalive;
+                  }
+                else {})
+                cfg.hosts;
+              # remove empty elements
+              cleanedServerPeers = lists.remove { } serverPeers;
+            in mkIf (!cfg.server) cleanedServerPeers; 
         };
       };
     };

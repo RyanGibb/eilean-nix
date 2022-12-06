@@ -31,7 +31,7 @@ let cfg = config.wireguard; in
           hostName: values: {
             allowedIPs = [ "${values.ip}/32" ];
             publicKey = values.publicKey;
-            persistentKeepalive = lib.mkIf (hostName == "rasp-pi") 25;
+            persistentKeepalive = values.persistentKeepalive;
           }
         ) cfg.hosts;
     };
