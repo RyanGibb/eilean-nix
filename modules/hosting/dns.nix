@@ -6,7 +6,7 @@ let cfg = config.hosting; in
   
   config.dns = lib.mkIf cfg.dns.enable {
     enable = true;
-    soa.serial = 2018011623;
+    soa.serial = lib.mkDefault 0;
     records = builtins.concatMap (ns: [
       {
         name = "@";
