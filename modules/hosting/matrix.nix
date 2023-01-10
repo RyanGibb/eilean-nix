@@ -6,7 +6,7 @@ let cfg = config.hosting; in
     enable = lib.mkEnableOption "matrix";
     turn = lib.mkOption {
       type = lib.types.bool;
-      default = true;
+      default = cfg.turn.enable;
     };
   };
 
