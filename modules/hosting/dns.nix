@@ -2,9 +2,9 @@
 
 let cfg = config.hosting; in
 {
-  options.hosting.dns = lib.mkEnableOption "dns";
+  options.hosting.dns.enable = lib.mkEnableOption "dns";
   
-  config.dns = lib.mkIf cfg.dns {
+  config.dns = lib.mkIf cfg.dns.enable {
     enable = true;
     soa.serial = 2018011623;
     records = builtins.concatMap (ns: [

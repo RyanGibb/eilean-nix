@@ -4,9 +4,9 @@ let
   cfg = config.hosting;
   domain = config.networking.domain;
 in {
-  options.hosting.mastodon = lib.mkEnableOption "mastodon";
+  options.hosting.mastodon.enable = lib.mkEnableOption "mastodon";
 
-  config = lib.mkIf cfg.mastodon {
+  config = lib.mkIf cfg.mastodon.enable {
     services.mastodon = {
       enable = true;
       enableUnixSocket = false;

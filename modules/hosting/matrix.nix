@@ -2,9 +2,9 @@
 
 let cfg = config.hosting; in
 {
-  options.hosting.matrix = lib.mkEnableOption "matrix";
+  options.hosting.matrix.enable = lib.mkEnableOption "matrix";
 
-  config = lib.mkIf cfg.matrix {
+  config = lib.mkIf cfg.matrix.enable {
     services.postgresql.enable = true;
     services.postgresql.package = pkgs.postgresql_13;
     services.postgresql.initialScript = pkgs.writeText "synapse-init.sql" ''

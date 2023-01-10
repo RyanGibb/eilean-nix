@@ -4,9 +4,9 @@ let
   cfg = config.hosting;
   domain = config.networking.domain;
 in {
-  options.hosting.gitea = lib.mkEnableOption "gitea";
+  options.hosting.gitea.enable = lib.mkEnableOption "gitea";
 
-  config = lib.mkIf cfg.gitea {
+  config = lib.mkIf cfg.gitea.enable {
     services.nginx = {
       recommendedProxySettings = true;
       virtualHosts."git.${domain}" = {

@@ -4,9 +4,9 @@ let
   cfg = config.hosting;
   domain = config.networking.domain;
 in {
-  options.hosting.mailserver = lib.mkEnableOption "mailserver";
+  options.hosting.mailserver.enable = lib.mkEnableOption "mailserver";
 
-  config = lib.mkIf cfg.mailserver {
+  config = lib.mkIf cfg.mailserver.enable {
     mailserver = {
       enable = true;
       fqdn = "mail.${domain}";
