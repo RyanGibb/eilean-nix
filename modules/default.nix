@@ -8,6 +8,7 @@
     ./hosting/gitea.nix
     ./hosting/dns.nix
     ./hosting/matrix.nix
+    ./hosting/turn.nix
     ./wireguard/server.nix
     ./wireguard/default.nix
   ];

@@ -2,7 +2,13 @@
 
 let cfg = config.hosting; in
 {
-  options.hosting.matrix.enable = lib.mkEnableOption "matrix";
+  options.hosting.matrix = {
+    enable = lib.mkEnableOption "matrix";
+    turn = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+    };
+  };
 
   config = lib.mkIf cfg.matrix.enable {
     services.postgresql.enable = true;
@@ -77,28 +83,36 @@ let cfg = config.hosting; in
 
     services.matrix-synapse = {
       enable = true;
-      settings = {
-        server_name = config.networking.domain;
-        enable_registration = true;
-        registration_requires_token = true;
-        auto_join_rooms = [ "#freumh:freumh.org" ];
-        registration_shared_secret_path = "${config.custom.secretsDir}/matrix-shared-secret";
-        listeners = [
-          {
-            port = 8008;
-            bind_addresses = [ "::1" "127.0.0.1" ];
-            type = "http";
-            tls = false;
-            x_forwarded = true;
-            resources = [
-              {
-                names = [ "client" "federation" ];
-                compress = false;
-              }
-            ];
-          }
-        ];
-      };
+      settings = lib.mkMerge [
+        {
+          server_name = config.networking.domain;
+          enable_registration = true;
+          registration_requires_token = true;
+          auto_join_rooms = [ "#freumh:freumh.org" ];
+          registration_shared_secret_path = "${config.custom.secretsDir}/matrix-shared-secret";
+          listeners = [
+            {
+              port = 8008;
+              bind_addresses = [ "::1" "127.0.0.1" ];
+              type = "http";
+              tls = false;
+              x_forwarded = true;
+              resources = [
+                {
+                  names = [ "client" "federation" ];
+                  compress = false;
+                }
+              ];
+            }
+          ];
+          max_upload_size = "100M";
+        }
+        (with config.services.coturn; lib.mkIf cfg.matrix.turn {
+          turn_uris = ["turn:${realm}:3478?transport=udp" "turn:${realm}:3478?transport=tcp"];
+          turn_shared_secret = static-auth-secret;
+          turn_user_lifetime = "1h";
+        })
+      ];
     };
 
     dns.records = [
