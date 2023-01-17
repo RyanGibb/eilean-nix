@@ -109,8 +109,8 @@ let cfg = config.hosting; in
         }
         (with config.services.coturn; lib.mkIf cfg.matrix.turn {
           turn_uris = ["turn:${realm}:3478?transport=udp" "turn:${realm}:3478?transport=tcp"];
-          turn_shared_secret = static-auth-secret;
           turn_user_lifetime = "1h";
+          extraConfigFiles = [ "${config.custom.secretsDir}/matrix-turn-shared-secret" ];
         })
       ];
     };
