@@ -1,10 +1,10 @@
 { pkgs, config, lib, ... }:
 
 let
-  cfg = config.hosting;
+  cfg = config.eilean;
   domain = config.networking.domain;
 in {
-  options.hosting.mastodon.enable = lib.mkEnableOption "mastodon";
+  options.eilean.mastodon.enable = lib.mkEnableOption "mastodon";
 
   config = lib.mkIf cfg.mastodon.enable {
     services.mastodon = {
@@ -19,7 +19,7 @@ in {
         port = 465;
         host = "mail.${domain}";
         authenticate = true;
-        passwordFile = "${config.custom.secretsDir}/email-pswd-unhashed";
+        passwordFile = "${config.eilean.secretsDir}/email-pswd-unhashed";
         fromAddress = "mastodon@${domain}";
       };
       extraConfig = {

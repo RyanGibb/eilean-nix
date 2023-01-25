@@ -1,11 +1,11 @@
 { config, pkgs, lib, ... }:
 
 let
-  cfg = config.hosting;
+  cfg = config.eilean;
   domain = config.networking.domain;
 in
 {
-  options.hosting.turn.enable = lib.mkEnableOption "TURN server";
+  options.eilean.turn.enable = lib.mkEnableOption "TURN server";
 
   config = lib.mkIf cfg.turn.enable {
     services.coturn = rec {
@@ -15,7 +15,7 @@ in
       min-port = 49000;
       max-port = 50000;
       use-auth-secret = true;
-      static-auth-secret-file = "${config.custom.secretsDir}/coturn";
+      static-auth-secret-file = "${config.eilean.secretsDir}/coturn";
       realm = "turn.${domain}";
       cert = "${config.security.acme.certs.${realm}.directory}/full.pem";
       pkey = "${config.security.acme.certs.${realm}.directory}/key.pem";

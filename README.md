@@ -28,6 +28,8 @@ Requires a public IPv4 and IPv6 address.
 Hosting DNS allows necessary records to be specified decleratively and enabled when the module that required then is.
 You will need to point your domain's NS record to your IP address with your registar using a glue record.
 
+need to update SOA serial No
+
 ##### Email
 
 Hosting email allows for an easy, and cheap, SMTP server for services that require it.

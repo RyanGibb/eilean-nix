@@ -1,8 +1,8 @@
 { config, lib, ... }:
 
-let cfg = config.hosting; in
+let cfg = config.eilean; in
 {
-  options.hosting.dns.enable = lib.mkEnableOption "dns";
+  options.eilean.dns.enable = lib.mkEnableOption "dns";
   
   config.dns = lib.mkIf cfg.dns.enable {
     enable = true;
@@ -16,7 +16,7 @@ let cfg = config.hosting; in
       {
         name = ns;
         type = "A";
-        data = config.hosting.serverIpv4;
+        data = cfg.serverIpv4;
       }
     ]) [ "ns1" "ns2" ] ++
     [
@@ -29,23 +29,23 @@ let cfg = config.hosting; in
       {
         name = "@";
         type = "A";
-        data = config.hosting.serverIpv4;
+        data = cfg.serverIpv4;
       }
       {
         name = "@";
         type = "AAAA";
-        data = config.hosting.serverIpv6;
+        data = cfg.serverIpv6;
       }
 
       {
         name = "vps";
         type = "A";
-        data = config.hosting.serverIpv4;
+        data = cfg.serverIpv4;
       }
       {
         name = "vps";
         type = "AAAA";
-        data = config.hosting.serverIpv6;
+        data = cfg.serverIpv6;
       }
       
       {

@@ -7,5 +7,6 @@
     nixosModules.default = {
       imports = [ ./modules/default.nix ];
     };
+    defaultTemplate.path = ./template;
   };
 }

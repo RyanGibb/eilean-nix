@@ -1,8 +1,8 @@
 { config, pkgs, lib, ... }:
 
-let cfg = config.hosting; in
+let cfg = config.eilean; in
 {
-  options.hosting.matrix = {
+  options.eilean.matrix = {
     enable = lib.mkEnableOption "matrix";
     turn = lib.mkOption {
       type = lib.types.bool;
@@ -89,7 +89,7 @@ let cfg = config.hosting; in
           enable_registration = true;
           registration_requires_token = true;
           auto_join_rooms = [ "#freumh:freumh.org" ];
-          registration_shared_secret_path = "${config.custom.secretsDir}/matrix-shared-secret";
+          registration_shared_secret_path = "${config.eilean.secretsDir}/matrix-shared-secret";
           listeners = [
             {
               port = 8008;
@@ -110,7 +110,7 @@ let cfg = config.hosting; in
         (with config.services.coturn; lib.mkIf cfg.matrix.turn {
           turn_uris = ["turn:${realm}:3478?transport=udp" "turn:${realm}:3478?transport=tcp"];
           turn_user_lifetime = "1h";
-          extraConfigFiles = [ "${config.custom.secretsDir}/matrix-turn-shared-secret" ];
+          extraConfigFiles = [ "${config.eilean.secretsDir}/matrix-turn-shared-secret" ];
         })
       ];
     };

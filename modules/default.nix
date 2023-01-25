@@ -1,15 +1,40 @@
+{ lib, config, ... }:
+
+with lib;
+
 {
   imports = [
     ./dns/default.nix
     ./mailserver/default.nix
-    ./hosting/default.nix
-    ./hosting/mastodon.nix
-    ./hosting/mailserver.nix
-    ./hosting/gitea.nix
-    ./hosting/dns.nix
-    ./hosting/matrix.nix
-    ./hosting/turn.nix
+    ./mastodon.nix
+    ./mailserver.nix
+    ./gitea.nix
+    ./dns.nix
+    ./matrix.nix
+    ./turn.nix
     ./wireguard/server.nix
     ./wireguard/default.nix
   ];
+
+  options.eilean = with types; {
+    username = mkOption {
+      type = str;
+    };
+    secretsDir = mkOption {
+      type = path;
+    };
+    serverIpv4 = mkOption {
+      type = str;
+    };
+    serverIpv6 = mkOption {
+      type = str;
+    };
+    publicInterface = mkOption {
+      type = str;
+    };
+  };
+
+  config = {
+    security.acme.defaults.email = "${config.eilean.username}@${config.networking.domain}";
+  };
 }

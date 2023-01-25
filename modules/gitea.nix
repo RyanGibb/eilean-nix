@@ -1,10 +1,11 @@
 { pkgs, config, lib, ... }:
 
 let
-  cfg = config.hosting;
+  cfg = config.eilean;
   domain = config.networking.domain;
+  sshPort = 3001;
 in {
-  options.hosting.gitea.enable = lib.mkEnableOption "gitea";
+  options.eilean.gitea.enable = lib.mkEnableOption "gitea";
 
   config = lib.mkIf cfg.gitea.enable {
     services.nginx = {
@@ -32,7 +33,7 @@ in {
       appName = "git | ${domain}";
       domain = "git.${domain}";
       rootUrl = "https://git.${domain}/";
-      mailerPasswordFile = "${config.custom.secretsDir}/email-pswd-unhashed";
+      mailerPasswordFile = "${config.eilean.secretsDir}/email-pswd-unhashed";
       settings = {
         mailer = {
           ENABLED = true;
@@ -47,7 +48,7 @@ in {
       };
       database = {
         type = "postgres";
-        passwordFile = "${config.custom.secretsDir}/gitea-db";
+        passwordFile = "${config.eilean.secretsDir}/gitea-db";
         user = "git";
         name = "git";
         #createDatabase = true;
@@ -84,5 +85,29 @@ in {
         data = "vps";
       }
     ];
+
+    # proxy port 22 on ethernet interface to internal gitea ssh server
+    # openssh server remains accessible on port 22 via vpn(s)
+
+    # allow forwarding
+    boot.kernel.sysctl = {
+      "net.ipv4.ip_forward" = 1;
+      "net.ipv6.conf.all.forwarding" = 1;
+    };
+
+    networking.firewall.extraCommands = ''
+      # proxy all traffic on public interface to the gitea SSH server
+      iptables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
+      ip6tables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
+
+      # proxy locally originating outgoing packets
+      iptables -A OUTPUT -d ${config.eilean.serverIpv4} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
+      ip6tables -A OUTPUT -d ${config.eilean.serverIpv6} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
+    '';
+
+    services.gitea.settings.server = {
+      START_SSH_SERVER = true;
+      SSH_LISTEN_PORT = sshPort;
+    };
   };
 }

@@ -59,7 +59,7 @@ let cfg = config.wireguard; in
         interfaces.wg0 = let hostName = config.networking.hostName; in {
           ips = [ "${cfg.hosts."${hostName}".ip}/24" ];
           listenPort = 51820;
-          privateKeyFile = "${config.custom.secretsDir}/wireguard-key-${hostName}";
+          privateKeyFile = "${config.eilean.secretsDir}/wireguard-key-${hostName}";
           peers =
             let
               serverPeers = attrsets.mapAttrsToList
