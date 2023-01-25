@@ -3,9 +3,14 @@
 let
   cfg = config.eilean;
   domain = config.networking.domain;
-  sshPort = 3001;
 in {
-  options.eilean.gitea.enable = lib.mkEnableOption "gitea";
+  options.eilean.gitea = {
+    enable = lib.mkEnableOption "gitea";
+    sshPort = lib.mkOption {
+      type = lib.types.int;
+      default = 3001;
+    };
+  };
 
   config = lib.mkIf cfg.gitea.enable {
     services.nginx = {
@@ -97,17 +102,17 @@ in {
 
     networking.firewall.extraCommands = ''
       # proxy all traffic on public interface to the gitea SSH server
-      iptables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
-      ip6tables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
+      iptables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
+      ip6tables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
 
       # proxy locally originating outgoing packets
-      iptables -A OUTPUT -d ${config.eilean.serverIpv4} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
-      ip6tables -A OUTPUT -d ${config.eilean.serverIpv6} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString sshPort}
+      iptables -A OUTPUT -d ${config.eilean.serverIpv4} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
+      ip6tables -A OUTPUT -d ${config.eilean.serverIpv6} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
     '';
 
     services.gitea.settings.server = {
       START_SSH_SERVER = true;
-      SSH_LISTEN_PORT = sshPort;
+      SSH_LISTEN_PORT = cfg.gitea.sshPort;
     };
   };
 }
