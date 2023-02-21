@@ -68,7 +68,7 @@ in {
       };
     };
 
-    dns.records = [
+    dns.zones.${config.networking.domain}.records = [
       {
         name = "mastodon";
         type = "CNAME";

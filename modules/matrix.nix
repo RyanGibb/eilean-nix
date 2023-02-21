@@ -115,7 +115,7 @@ let cfg = config.eilean; in
       ];
     };
 
-    dns.records = [
+    dns.zones.${config.networking.domain}.records = [
       {
         name = "matrix";
         type = "CNAME";

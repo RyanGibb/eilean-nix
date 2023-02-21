@@ -83,7 +83,7 @@ in {
       SystemCallFilter = lib.mkForce [];
     };
 
-    dns.records = [
+    dns.zones.${config.networking.domain}.records = [
       {
         name = "git";
         type = "CNAME";

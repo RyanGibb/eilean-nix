@@ -43,7 +43,7 @@ in {
       return 301 $scheme://${domain}$request_uri;
     '';
 
-    dns.records = [
+    dns.zones.${config.networking.domain}.records = [
       {
         name = "mail";
         type = "A";

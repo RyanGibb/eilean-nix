@@ -2,19 +2,8 @@
 
 with lib;
 
-{
-  imports = [ ./bind.nix ];
-
-  options.dns = {
-    enable = lib.mkEnableOption "DNS server";
-    server = mkOption {
-      type = types.enum [ "bind" ];
-      default = "bind";
-    };
-    domain = mkOption {
-      type = types.str;
-      default = config.networking.domain;
-    };
+let
+  zoneOptions.options = {
     ttl = mkOption {
       type = types.int;
       default = 3600; # 1hr
@@ -50,26 +39,38 @@ with lib;
       };
     };
     records =
-      let recordOpts = {
-        options = {
-          name = mkOption {
-            type = types.str;
-          };
-          ttl = mkOption {
-            type = with types; nullOr int;
-            default = null;
-          };
-          type = mkOption {
-            type = types.str;
-          };
-          data = mkOption {
-            type = types.str;
-          };
+      let recordOpts.options = {
+        name = mkOption {
+          type = types.str;
+        };
+        ttl = mkOption {
+          type = with types; nullOr int;
+          default = null;
+        };
+        type = mkOption {
+          type = types.str;
+        };
+        data = mkOption {
+          type = types.str;
         };
       };
       in mkOption {
         type = with types; listOf (submodule recordOpts);
         default = [ ];
       };
+  };
+in
+{
+  imports = [ ./bind.nix ];
+
+  options.dns = {
+    enable = lib.mkEnableOption "DNS server";
+    server = mkOption {
+      type = types.enum [ "bind" ];
+      default = "bind";
+    };
+    zones = mkOption {
+      type = with types; attrsOf (submodule zoneOptions);
+    };
   };
 }

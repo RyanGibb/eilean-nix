@@ -48,7 +48,7 @@ in
     };
     users.groups."turnserver".members = [ config.services.nginx.user ];
 
-    dns.records = [
+    dns.zones.${config.networking.domain}.records = [
       {
         name = "turn";
         type = "CNAME";
