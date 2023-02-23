@@ -27,7 +27,7 @@ let
       };
       retry = mkOption {
         type = types.int;
-        default = 15; # 15m
+        default = 900; # 15m
       };
       expire = mkOption {
         type = types.int;
