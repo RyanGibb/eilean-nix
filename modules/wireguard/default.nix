@@ -8,7 +8,10 @@ let cfg = config.wireguard; in
     enable = mkEnableOption "wireguard";
     server = mkOption {
       type = with types; bool;
-      default = cfg.hosts.${config.networking.hostName}.server;
+      default =
+        if cfg.hosts ? config.networking.hostName then
+          cfg.hosts.${config.networking.hostName}.server
+        else false;
     };
     hosts =
       let hostOps = { ... }: {
@@ -57,8 +60,11 @@ let cfg = config.wireguard; in
       wireguard = {
         enable = true;
         interfaces.wg0 = let hostName = config.networking.hostName; in {
-          ips = [ "${cfg.hosts."${hostName}".ip}/24" ];
-          listenPort = 51820;
+          ips =
+            if cfg.hosts ? hostname then
+              [ "${cfg.hosts."${hostName}".ip}/24" ]
+            else [ ];
+          listenPort = 51820; 
           privateKeyFile = "${config.eilean.secretsDir}/wireguard-key-${hostName}";
           peers =
             let
