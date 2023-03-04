@@ -2,23 +2,22 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     eilean.url ="github:RyanGibb/eilean-nix/main";
+    eilean.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, eilean, ... }@inputs: rec {
-    nixosConfigurations.server =
-      let
-        system = "x86_64-linux";
-      in nixpkgs.lib.nixosSystem {
-        inherit system;
-        pkgs = import nixpkgs { inherit system; };
+  outputs = { self, nixpkgs, eilean, ... }@inputs:
+      let hostname = "eilean"; in
+    rec {
+    nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
+        system = null;
+        pkgs = null;
         modules = [
-            ./default.nix
+            ./configuration.nix
             eilean.nixosModules.default
             {
-              networking.hostName = "server";
+              networking.hostName = hostname;
               # pin nix command's nixpkgs flake to the system flake to avoid unnecessary downloads
               nix.registry.nixpkgs.flake = nixpkgs;
-              system.stateVersion = "22.11";
               # record git revision (can be queried with `nixos-version --json)
               system.configurationRevision = nixpkgs.lib.mkIf (self ? rev) self.rev;
             }
