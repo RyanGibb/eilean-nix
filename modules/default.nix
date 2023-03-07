@@ -12,6 +12,7 @@ with lib;
     ./dns.nix
     ./matrix.nix
     ./turn.nix
+    ./headscale.nix
     ./wireguard/server.nix
     ./wireguard/default.nix
   ];
