@@ -19,7 +19,7 @@ in {
         enableACME = true;
         forceSSL = true;
         locations."/" = {
-          proxyPass = "http://localhost:${builtins.toString config.services.gitea.httpPort}/";
+          proxyPass = "http://localhost:${builtins.toString config.services.gitea.settings.server.HTTP_PORT}/";
         };
       };
     };
@@ -36,10 +36,12 @@ in {
       enable = true;
       user = "git";
       appName = "git | ${domain}";
-      domain = "git.${domain}";
-      rootUrl = "https://git.${domain}/";
       mailerPasswordFile = "${config.eilean.secretsDir}/email-pswd-unhashed";
       settings = {
+        server = {
+          ROOT_URL = "https://git.${domain}/";
+          DOMAIN = "git.${domain}";
+        };
         mailer = {
           ENABLED = true;
           FROM = "git@${domain}";
@@ -50,6 +52,7 @@ in {
         };
         repository.DEFAULT_BRANCH = "main";
         service.DISABLE_REGISTRATION = true;
+        #server.HTTP_PORT = 3000;
       };
       database = {
         type = "postgres";
@@ -59,7 +62,6 @@ in {
         #createDatabase = true;
         #socket = "/run/postgresql";
       };
-      #httpPort = 3000;
       #stateDir = "/var/lib/gitea";
     };
 

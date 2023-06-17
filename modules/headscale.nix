@@ -24,15 +24,15 @@ in {
       enable = true;
       # address = "127.0.0.1";
       port = 10000;
-      serverUrl = "https://${cfg.headscale.domain}";
-      dns = {
-        # magicDns = true;
-        nameservers = config.networking.nameservers;
-        baseDomain = "${cfg.headscale.zone}";
-      };
       settings = {
+        server_url = "https://${cfg.headscale.domain}";
         logtail.enabled = false;
         ip_prefixes = [ "100.64.0.0/10" ];
+        dns_config = {
+          # magicDns = true;
+          nameservers = config.networking.nameservers;
+          base_domain = "${cfg.headscale.zone}";
+        };
       };
     };
 
