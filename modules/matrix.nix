@@ -107,12 +107,17 @@ let cfg = config.eilean; in
           ];
           max_upload_size = "100M";
         }
-        (with config.services.coturn; lib.mkIf cfg.matrix.turn {
-          turn_uris = ["turn:${realm}:3478?transport=udp" "turn:${realm}:3478?transport=tcp"];
+        (lib.mkIf cfg.matrix.turn {
+          turn_uris = with config.services.coturn; [
+            "turn:${realm}:3478?transport=udp"
+            "turn:${realm}:3478?transport=tcp"
+            "turns:${realm}:5349?transport=udp"
+            "turns:${realm}:5349?transport=tcp"
+          ];
           turn_user_lifetime = "1h";
-          extraConfigFiles = [ "${config.eilean.secretsDir}/matrix-turn-shared-secret" ];
         })
       ];
+      extraConfigFiles = [ "${config.eilean.secretsDir}/matrix-turn-shared-secret" ];
     };
 
     dns.zones.${config.networking.domain}.records = [

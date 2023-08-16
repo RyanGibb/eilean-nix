@@ -12,27 +12,36 @@ in
       enable = true;
       no-cli = true;
       no-tcp-relay = true;
-      min-port = 49000;
-      max-port = 50000;
+      secure-stun = true;
       use-auth-secret = true;
       static-auth-secret-file = "${config.eilean.secretsDir}/coturn";
       realm = "turn.${domain}";
+      relay-ips = with config.eilean; [
+        serverIpv4
+        serverIpv6
+      ];
       cert = "${config.security.acme.certs.${realm}.directory}/full.pem";
       pkey = "${config.security.acme.certs.${realm}.directory}/key.pem";
-      secure-stun = true;
     };
 
     networking.firewall =
+      with config.services.coturn;
       let
-        turn-range = with config.services.coturn; {
+        turn-range = {
           from = min-port;
           to = max-port;
         };
-        stun-port = 3478;
+        stun-ports = [
+          listening-port
+          tls-listening-port
+          # these are only used if server has more than one IP address (of the same family
+          #alt-listening-port
+          #alt-tls-listening-port
+        ];
       in {
-        allowedTCPPorts = lib.mkForce [ stun-port ];
+        allowedTCPPorts = lib.mkForce stun-ports;
         allowedTCPPortRanges = [ turn-range ];
-        allowedUDPPorts = lib.mkForce [ stun-port ];
+        allowedUDPPorts = lib.mkForce stun-ports;
         allowedUDPPortRanges = [ turn-range ];
     };
 
@@ -41,7 +50,7 @@ in
       group = "turnserver";
     };
     services.nginx.virtualHosts = {
-      "turn.${domain}" = {
+      "${config.services.coturn.realm}" = {
         forceSSL = true;
         enableACME = true;
       };
