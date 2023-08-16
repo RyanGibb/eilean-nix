@@ -39,9 +39,9 @@ in
           #alt-tls-listening-port
         ];
       in {
-        allowedTCPPorts = lib.mkForce stun-ports;
+        allowedTCPPorts = stun-ports;
         allowedTCPPortRanges = [ turn-range ];
-        allowedUDPPorts = lib.mkForce stun-ports;
+        allowedUDPPorts = stun-ports;
         allowedUDPPortRanges = [ turn-range ];
     };
 

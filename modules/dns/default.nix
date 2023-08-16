@@ -69,8 +69,17 @@ in
       type = types.enum [ "bind" ];
       default = "bind";
     };
+    openFirewall = mkOption {
+      type = types.bool;
+      default = true;
+    };
     zones = mkOption {
       type = with types; attrsOf (submodule zoneOptions);
     };
+  };
+
+  config.networking.firewall = lib.mkIf config.dns.openFirewall {
+    allowedTCPPorts = [ 53 ];
+    allowedUDPPorts = [ 53 ];
   };
 }

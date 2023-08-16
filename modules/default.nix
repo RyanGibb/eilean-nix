@@ -37,5 +37,9 @@ with lib;
 
   config = {
     security.acme.defaults.email = "${config.eilean.username}@${config.networking.domain}";
+    networking.firewall.allowedTCPPorts = lib.mkIf config.services.nginx.enable [
+      80 # HTTP
+      443 # HTTPS
+    ];
   };
 }
