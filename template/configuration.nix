@@ -1,10 +1,6 @@
 { pkgs, config, lib, ... }:
 
 {
-  imports = [
-    ./hardware-configuration.nix
-  ];
-
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # TODO change system if not running on x84_64
