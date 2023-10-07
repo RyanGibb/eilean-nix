@@ -5,25 +5,42 @@
     ./hardware-configuration.nix
   ];
 
-  nixpkgs.hostPlatform.system = "x86_64-linux";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  system.stateVersion = "22.11";
 
-  services.openssh = {
-    enable = true;
-    settings.passwordAuthentication = false;
-  };
+  # TODO change system if not running on x84_64
+  nixpkgs.hostPlatform.system = "x86_64-linux";
+
+  system.stateVersion = "22.11";
 
   environment.systemPackages = with pkgs; [
     git # for nix flakes
     vim # for editing config files
   ];
 
-  users.users.root = {
-    initialHashedPassword = "";
-    users.users.root.openssh.authorizedKeys.keys = [
-      # "ssh-ed25519 <key> <name>"
-    ];
+  # very simple prompt
+  programs.bash.promptInit = ''
+    PS1='\u@\h:\w \$ '
+  '';
+
+  users.users = {
+    root = {
+      # TODO set hashed password from `nix run nixpkgs#mkpasswd`
+      initialHashedPassword = "";
+    };
+    # TODO change username, if desired
+    nixos = {
+      # TODO set hashed password from `nix run nixpkgs#mkpasswd`
+      initialHashedPassword = "";
+      openssh.authorizedKeys.keys = [
+        # TODO define SSH keys if accessing remotely
+        # "ssh-ed25519 <key> <name>"
+      ];
+    };
+  };
+
+  services.openssh = {
+    enable = true;
+    settings.passwordAuthentication = false;
   };
 
   # TODO replace this with domain
@@ -38,6 +55,7 @@
     serverIpv6 = "2001:DB8::/64";
     publicInterface = "eth0";
 
+    # TODO enable desired services
     # mailserver.enable = true;
     # matrix.enable = true;
     # turn.enable = true;
