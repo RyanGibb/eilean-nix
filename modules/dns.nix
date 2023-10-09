@@ -2,7 +2,14 @@
 
 let cfg = config.eilean; in
 {
-  options.eilean.dns.enable = lib.mkEnableOption "dns";
+  
+  options.eilean.dns = {
+    enable = lib.mkEnableOption "dns";
+    nameservers = lib.mkOption {
+      type = lib.types.listOf lib.types.string;
+      default = [ "ns1" "ns2" ];
+    };
+  };
   
   config.dns = lib.mkIf cfg.dns.enable {
     enable = true;
@@ -19,7 +26,17 @@ let cfg = config.eilean; in
           type = "A";
           data = cfg.serverIpv4;
         }
-      ]) [ "ns1" "ns2" ] ++
+        {
+          name = "@";
+          type = "NS";
+          data = ns;
+        }
+        {
+          name = ns;
+          type = "A";
+          data = cfg.serverIpv6;
+        }
+      ]) cfg.dns.nameservers ++
       [
         {
           name = "www";
