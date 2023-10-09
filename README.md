@@ -1,39 +1,16 @@
-Warning: work in progress.
 
-# Eilean
+# Eilean 🏝️
 
-Create your own digital island powered by Nix.
+Eilean enables you to host your own digital 'island', where you control you're own online infrastructure.
+The use of federated protocols allows you to 'bridge' your island to others.
 
-Self hosting is hard.
-There's a lot of complexity to manage.
+Eilean uses [NixOS](https://nixos.org/) to enable reproducible deployments of services such as webservers, mailservers, federated communication servers, Virtual Private Network servers, and more.
+However, they still require a lot of manual configuration for domain names, DNS records, user accounts, databases, HTTP proxies, TLS certificates, and more.
 
-While NixOS enables reproducible deployments of many services, they still require much manual configuration.
-Adding domain names, DNS records, user accounts, databases, HTTP proxies, SMTP servers all add additional complexity.
+Eilean aims to be a optioned framework to allow the simple deployment of these services on a single machine, and a library of documentation for common issues in managing runtime state like secrets, databases, and upgrades.
 
-Eilean aims to be a personal or community 'island in a box' that requires minimal configuration.
-It can achieve this by sharing configration between many NixOS modules (each for an individuial service).
+By using Nix Eilean modules are extensive to other configurations outside this deployment scenario, such as offloading a particularly resource heavy service to a dedicated machine.
 
-### Usage
+Contributions for additional services welcome.
 
-Some familiarity with Nix is required. 
-
-TODO...
-
-##### Networking
-
-Requires a public IPv4 and IPv6 address.
-
-##### DNS
-
-Hosting DNS allows necessary records to be specified decleratively and enabled when the module that required then is.
-You will need to point your domain's NS record to your IP address with your registar using a glue record.
-
-need to update SOA serial No
-
-##### Email
-
-Hosting email allows for an easy, and cheap, SMTP server for services that require it.
-Recieving EMail shouldn't pose an issues.
-Sending email to users on your own domain shouldn't pose any issues, if for example users are signing up to services like Mastodon using an EMail account on the same Eilean.
-Sending mail will require TCP port 25 to be unblocked by your network provider, and your IP address to not be blacklisted (e.g. check [here](https://mxtoolbox.com/blacklists.aspx)).
-
+For instructions on getting started see [docs/getting_started.md](./docs/getting_started.md).

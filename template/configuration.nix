@@ -54,19 +54,21 @@
 
   eilean = {
     # TODO replace these values
-    username = "user";
-    secretsDir = "/secrets";
-    serverIpv4 = "203.0.113.0";
-    serverIpv6 = "2001:DB8:0:0:0:0:0:0";
-    publicInterface = "enp1s0";
+    # serverIpv4 = "203.0.113.0";
+    # serverIpv6 = "2001:DB8:0:0:0:0:0:0";
+    # publicInterface = "enp1s0";
+
+    # TODO replace with your desired username
+    # username = "user";
 
     # TODO enable desired services
-    dns.enable = true;
     # mailserver.enable = true;
     # matrix.enable = true;
     # mastodon.enable = true;
     # gitea.enable = true;
-    # dns.enable = true;
+    # headscale.enable = true;
+
+    # secretsDir = "/secrets";
   };
 
   # This value determines the NixOS release from which the default
