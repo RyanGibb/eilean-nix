@@ -37,9 +37,11 @@ in {
       user = "git";
       appName = "git | ${domain}";
       mailerPasswordFile = "${config.eilean.secretsDir}/email-pswd-unhashed";
-      domain = "git.${domain}";
-      rootUrl = "https://git.${domain}/";
       settings = {
+        server = {
+          ROOT_URL = "https://git.${domain}/";
+          DOMAIN = "git.${domain}";
+        };
         mailer = {
           ENABLED = true;
           FROM = "git@${domain}";
