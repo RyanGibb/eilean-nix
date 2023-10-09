@@ -120,7 +120,7 @@ let cfg = config.eilean; in
       extraConfigFiles = [ "${config.eilean.secretsDir}/matrix-turn-shared-secret" ];
     };
 
-    dns.zones.${config.networking.domain}.records = [
+    eilean.services.dns.zones.${config.networking.domain}.records = [
       {
         name = "matrix";
         type = "CNAME";

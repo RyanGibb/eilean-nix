@@ -1,6 +1,6 @@
 { pkgs, config, lib, ... }:
 
-let cfg = config.dns; in {
+let cfg = config.eilean.services.dns; in {
   services.bind = lib.mkIf (cfg.enable && cfg.server == "bind") {
     enable = true;
     # recursive resolver

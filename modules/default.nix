@@ -4,7 +4,7 @@ with lib;
 
 {
   imports = [
-    ./dns/default.nix
+    ./services/dns/default.nix
     ./mailserver/default.nix
     ./mastodon.nix
     ./mailserver.nix

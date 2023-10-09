@@ -63,7 +63,7 @@ in
 {
   imports = [ ./bind.nix ];
 
-  options.dns = {
+  options.eilean.services.dns = {
     enable = lib.mkEnableOption "DNS server";
     server = mkOption {
       type = types.enum [ "bind" ];
@@ -78,7 +78,7 @@ in
     };
   };
 
-  config.networking.firewall = lib.mkIf config.dns.openFirewall {
+  config.networking.firewall = lib.mkIf config.eilean.services.dns.openFirewall {
     allowedTCPPorts = [ 53 ];
     allowedUDPPorts = [ 53 ];
   };

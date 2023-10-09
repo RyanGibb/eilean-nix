@@ -43,7 +43,7 @@ in {
       return 301 $scheme://${domain}$request_uri;
     '';
 
-    dns.zones.${config.networking.domain}.records = [
+    eilean.services.dns.zones.${config.networking.domain}.records = [
       {
         name = "mail";
         type = "A";

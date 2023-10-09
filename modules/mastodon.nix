@@ -68,7 +68,7 @@ in {
       };
     };
 
-    dns.zones.${config.networking.domain}.records = [
+    eilean.services.dns.zones.${config.networking.domain}.records = [
       {
         name = "mastodon";
         type = "CNAME";

@@ -11,7 +11,7 @@ let cfg = config.eilean; in
     };
   };
   
-  config.dns = lib.mkIf cfg.dns.enable {
+  config.eilean.services.dns = lib.mkIf cfg.dns.enable {
     enable = true;
     zones.${config.networking.domain} = {
       soa.serial = lib.mkDefault 0;
