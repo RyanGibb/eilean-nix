@@ -120,7 +120,7 @@ let cfg = config.eilean; in
       extraConfigFiles = [ "${config.eilean.secretsDir}/matrix-turn-shared-secret" ];
     };
 
-    cfg.turn.enable = lib.mkIf cfg.matrix.turn true;
+    eilean.turn.enable = lib.mkIf cfg.matrix.turn true;
 
     eilean.dns.enable = true;
     eilean.services.dns.zones.${config.networking.domain}.records = [
