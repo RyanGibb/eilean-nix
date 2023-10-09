@@ -49,7 +49,7 @@ in {
     environment.systemPackages = [ config.services.headscale.package ];
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones..${cfg.headscale.zone}.records = [
+    eilean.services.dns.zones.${cfg.headscale.zone}.records = [
       {
         name = "${cfg.headscale.domain}.";
         type = "CNAME";

@@ -3,7 +3,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     eilean.url ="github:RyanGibb/eilean-nix/main";
     # replace the below line to manage the Nixpkgs instance yourself
-    nixpkgs.follows = "eilean-nix/nixpkgs";
+    nixpkgs.follows = "eilean/nixpkgs";
     #eilean.inputs.nixpkgs.follows = "nixpkgs";
   };
 

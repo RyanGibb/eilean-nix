@@ -123,7 +123,7 @@ let cfg = config.eilean; in
     cfg.turn.enable = lib.mkIf cfg.matrix.turn true;
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones..${config.networking.domain}.records = [
+    eilean.services.dns.zones.${config.networking.domain}.records = [
       {
         name = "matrix";
         type = "CNAME";

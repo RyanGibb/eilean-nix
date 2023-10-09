@@ -44,7 +44,7 @@ in {
     '';
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones..${config.networking.domain}.records = [
+    eilean.services.dns.zones.${config.networking.domain}.records = [
       {
         name = "mail";
         type = "A";
