@@ -2,9 +2,15 @@
 # Setup
 
 This guide walks a user through the first time setup of a server running Eilean.
-If you already have a NixOS system, please feel look at [adding eilean](adding_eilean.md) to an existing system.
-Some familiarity with networking, operating systems, and Linux is necessary.
-Some familiarity with Nix is beneficial.
+
+If you already have a NixOS system and want to use Eilean you can add to your configuration.
+Note this requires a flake-enabled system.
+Add `github:RyanGibb/eilean-nix` as an input to your flake, and import `eilean.nixosModules.default`.
+You should then be able to use the configuration options in `config.eilean`.
+See [../template/flake.nix](../template/flake.nix) for an example.
+
+Otherwise, some familiarity with networking, operating systems, and Linux is necessary.
+And some familiarity with Nix is beneficial.
 
 ## Step 1: Find a server
 
@@ -159,41 +165,4 @@ It's a good idea to enable one service at a time initially or else if you run in
 
 ## Further Information 
 
-### Website
-
-TODO
-
-### Secrets
-
-TODO
-
-### Backups
-
-TODO
-
-##### Email
-
-Hosting email allows for an easy, and cheap, SMTP server for services that require it.
-Receiving EMail shouldn't pose an issues.
-Sending email to users on your own domain shouldn't pose any issues, if for example users are signing up to services like Mastodon using an EMail account on the same Eilean.
-Sending mail will require TCP port 25 to be unblocked by your network provider, and your IP address to not be blacklisted (e.g. check [here](https://mxtoolbox.com/blacklists.aspx)).
-
-not managed:
-- multiple domains
-- multiple servers /load balance
-
-### Matrix
-
-TODO
-
-### Mastodon
-
-TODO
-
-### Gitea
-
-TODO
-
-### Wireguard/Headscale
-
-TODO
+See [docs](../docs/).
