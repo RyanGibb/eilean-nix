@@ -9,7 +9,7 @@ let cfg = config.dns; in {
       let mapZones = zonename: zone:
         {
           master = true;
-          file = import ./zonefile.nix { inherit pkgs config lib zonename zone; };
+          file = "${import ./zonefile.nix { inherit pkgs config lib zonename zone; }}/${zonename}";
           # axfr zone transfer
           slaves = [
             "127.0.0.1"
