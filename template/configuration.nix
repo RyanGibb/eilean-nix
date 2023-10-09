@@ -64,7 +64,6 @@
     dns.enable = true;
     # mailserver.enable = true;
     # matrix.enable = true;
-    # turn.enable = true;
     # mastodon.enable = true;
     # gitea.enable = true;
     # dns.enable = true;
