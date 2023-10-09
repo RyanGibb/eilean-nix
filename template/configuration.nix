@@ -40,7 +40,7 @@
 
   services.openssh = {
     enable = true;
-    settings.passwordAuthentication = false;
+    settings.PasswordAuthentication = false;
   };
 
   # TODO replace this with domain
