@@ -33,7 +33,7 @@ let cfg = config.eilean; in
         }
         {
           name = ns;
-          type = "A";
+          type = "AAAA";
           data = cfg.serverIpv6;
         }
       ]) cfg.dns.nameservers ++
