@@ -14,6 +14,7 @@ in {
 
   config = lib.mkIf cfg.gitea.enable {
     services.nginx = {
+      enable = true;
       recommendedProxySettings = true;
       virtualHosts."git.${domain}" = {
         enableACME = true;

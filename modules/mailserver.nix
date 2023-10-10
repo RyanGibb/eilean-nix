@@ -39,6 +39,7 @@ in {
       localDnsResolver = false;
     };
 
+    services.nginx.enable = true;
     services.nginx.virtualHosts."${config.mailserver.fqdn}".extraConfig = ''
       return 301 $scheme://${domain}$request_uri;
     '';

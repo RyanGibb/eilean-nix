@@ -36,6 +36,7 @@ in {
       };
     };
 
+    services.nginx.enable = true;  
     services.nginx.virtualHosts.${cfg.headscale.domain} = {
       forceSSL = true;
       enableACME = true;

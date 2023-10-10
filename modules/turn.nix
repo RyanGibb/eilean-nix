@@ -49,6 +49,7 @@ in
       postRun = "systemctl reload nginx.service; systemctl restart coturn.service";
       group = "turnserver";
     };
+    services.nginx.enable = true;
     services.nginx.virtualHosts = {
       "${config.services.coturn.realm}" = {
         forceSSL = true;
