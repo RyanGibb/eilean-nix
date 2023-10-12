@@ -18,13 +18,11 @@ And some familiarity with Nix is beneficial.
 You can use this referral link to get started on Hetzner: https://hetzner.cloud/?ref=XydbkWdf49TY.
 
 - Option 2: your own hardware, such as an old PC or laptop, Raspberry Pi, or a custom-build server.
-Note you'll need a static IPv4^[1] address for reliable hosting[^2]. If you're behind Network Address Translation (NAT) you'll need to set up port forwarding for every service you want to run.
+Note you'll need a static IPv4[^1] address for reliable hosting[^2]. If you're behind Network Address Translation (NAT) you'll need to set up port forwarding for every service you want to run.
 
-The resource requirements depend on the number of services you want to run and 
-resource requirements
-under 10G disk space with no services...
-with all enabled...
-
+The resource requirements depend on the number of services you want to run, and the load they'll be under.
+With no services 10GiB of disk space and 1GiB of RAM is plenty, though you may want to enable swap if you have low memory.
+With all services enabled and fairly populated databases 40GiB of disk space and 2GiB of RAM is appropriate.
 
 [^1]: You could just use an IPv6 address, but much of the Internet is still [IPv4-only](https://stats.labs.apnic.net/ipv6).
 
