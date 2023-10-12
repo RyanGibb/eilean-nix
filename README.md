@@ -1,7 +1,7 @@
 
 # Eilean 🏝️
 
-Eilean enables you to host your own digital 'island', where you control you're own online infrastructure.
+Eilean enables you to host your own digital 'island', where you control your own online infrastructure.
 The use of federated protocols allows you to 'bridge' your island to others.
 
 Eilean uses [NixOS](https://nixos.org/) to enable reproducible deployments of services such as webservers, mailservers, federated communication servers, Virtual Private Network servers, and more.
