@@ -1,5 +1,9 @@
 
-# Eilean 🏝️
+# Eilean
+
+<div align="center">
+    <img src="./eilean.png" width="400"/>
+</div>
 
 Eilean enables you to host your own digital 'island', where you control your own online infrastructure.
 The use of federated protocols allows you to 'bridge' your island to others.
