@@ -28,7 +28,7 @@ With all services enabled and fairly populated databases 40GiB of disk space and
 
 [^2]: If you don't have a static address, Dynamic DNS is possible but takes some time to propagate. Email reputation is tied to your IP address; using a residential address assigned by your ISP may get your mail blocked.
 
-Resource requirements depends how many service you want to run and how much load they'll be under, but 2 GB RAM and 20 GB disk should be a good starting point.
+Resource requirements depends how many service you want to run and how much load they'll be under, but 2 GiB RAM and 20 GiB disk should be a good starting point.
 
 ## Step 2: Install NixOS with Eilean
 
