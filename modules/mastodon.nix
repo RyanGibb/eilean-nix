@@ -42,9 +42,14 @@ in {
       recommendedProxySettings = true;
       virtualHosts = {
         # relies on root domain being set up
-        "${domain}".locations."/.well-known/host-meta".extraConfig = ''
-          return 301 https://mastodon.${domain}$request_uri;
-        '';
+        "${domain}".locations = {
+          "/.well-known/host-meta".extraConfig = ''
+            return 301 https://mastodon.${domain}$request_uri;
+          '';
+          "/.well-known/webfinger".extraConfig = ''
+            return 301 https://mastodon.${domain}$request_uri;
+          '';
+        };
         "mastodon.${domain}" = {
           root = "${config.services.mastodon.package}/public/";
           forceSSL = true;
