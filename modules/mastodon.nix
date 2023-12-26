@@ -13,6 +13,7 @@ in {
       webProcesses = 1;
       webThreads = 3;
       sidekiqThreads = 5;
+      streamingProcesses = 3;
       smtp = {
         #createLocally = false;
         user = "misc@${domain}";
