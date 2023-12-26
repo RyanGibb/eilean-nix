@@ -5,8 +5,8 @@
     <img src="./eilean.png" width="400"/>
 </div>
 
-Eilean enables you to host your own digital island, where you control your own online infrastructure.
-The use of federated protocols allows you to ferry data to other islands.
+Eilean enables you to host your own digital island where you control your own online infrastructure.
+Through the use of open standards and federated protocols Eilean allows you to interoperate with other providers.
 
 [NixOS](https://nixos.org/) is used to enable reproducible deployments of services such as webservers, mailservers, federated communication servers, Virtual Private Network servers, and more.
 However, such services still require a lot of manual configuration for domain names, DNS records, user accounts, databases, HTTP proxies, TLS certificates, and more.
