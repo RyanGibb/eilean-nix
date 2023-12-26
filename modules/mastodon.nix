@@ -60,11 +60,6 @@ in {
             proxyPass = "http://127.0.0.1:${builtins.toString config.services.mastodon.webPort}";
             proxyWebsockets = true;
           };
-
-          locations."/api/v1/streaming/" = {
-            proxyPass = "http://127.0.0.1:${builtins.toString config.services.mastodon.streamingPort}/";
-            proxyWebsockets = true;
-          };
         };
       };
     };
