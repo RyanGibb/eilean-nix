@@ -76,7 +76,7 @@ in {
         name = "_dmarc";
         ttl = 10800;
         type = "TXT";
-        data = "\"v=DMARC1; p=none\"";
+        data = "\"v=DMARC1; p=reject\"";
       }
     ];
   };
