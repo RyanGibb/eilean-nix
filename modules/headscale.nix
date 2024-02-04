@@ -36,14 +36,16 @@ in {
       };
     };
 
-    services.nginx.enable = true;  
-    services.nginx.virtualHosts.${cfg.headscale.domain} = {
-      forceSSL = true;
-      enableACME = true;
-      locations."/" = {
-        proxyPass = with config.services.headscale;
-          "http://${address}:${toString port}";
-        proxyWebsockets = true;
+    services.nginx = {
+      enable = true;
+      virtualHosts.${cfg.headscale.domain} = {
+        forceSSL = true;
+        enableACME = true;
+        locations."/" = {
+          proxyPass = with config.services.headscale;
+            "http://${address}:${toString port}";
+          proxyWebsockets = true;
+        };
       };
     };
 
