@@ -1,7 +1,8 @@
 { pkgs, config, lib, ... }:
 
-let cfg = config.eilean.services.dns; in {
-  services.bind = lib.mkIf (cfg.enable && cfg.server == "bind") {
+let cfg = config.eilean.services.dns; in
+lib.mkIf (cfg.enable && cfg.server == "bind") {
+  services.bind = {
     enable = true;
     # recursive resolver
     # cacheNetworks = [ "0.0.0.0/0" ];
@@ -9,7 +10,8 @@ let cfg = config.eilean.services.dns; in {
       let mapZones = zonename: zone:
         {
           master = true;
-          file = "${import ./zonefile.nix { inherit pkgs config lib zonename zone; }}/${zonename}";
+          file = "${config.services.bind.directory}/${zonename}";
+          #file = "${import ./zonefile.nix { inherit pkgs config lib zonename zone; }}/${zonename}";
           # axfr zone transfer
           slaves = [
             "127.0.0.1"
@@ -17,4 +19,13 @@ let cfg = config.eilean.services.dns; in {
         };
       in builtins.mapAttrs mapZones cfg.zones;
   };
+
+  ### bind prestart copy zonefiles
+  systemd.services.bind.preStart =
+    let ops =
+      let mapZones = zonename: zone:
+        "cp ${import ./zonefile.nix { inherit pkgs config lib zonename zone; }}/${zonename}" +
+        " ${config.services.bind.directory}/${zonename}";
+      in lib.attrsets.mapAttrsToList mapZones cfg.zones;
+    in builtins.concatStringsSep "\n" ops;
 }
