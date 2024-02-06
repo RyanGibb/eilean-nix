@@ -39,12 +39,6 @@ let cfg = config.eilean; in
       ]) cfg.dns.nameservers ++
       [
         {
-          name = "www";
-          type = "CNAME";
-          data = "@";
-        }
-
-        {
           name = "@";
           type = "A";
           data = cfg.serverIpv4;

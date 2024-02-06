@@ -44,7 +44,7 @@ let cfg = config.eilean; in
               # the client-server and server-server port for simplicity
               server = { "m.server" = "matrix.${config.networking.domain}:443"; };
             in ''
-              add_header Content-Type application/json;
+              default_type application/json;
               return 200 '${builtins.toJSON server}';
             '';
           locations."= /.well-known/matrix/client".extraConfig =
@@ -54,9 +54,15 @@ let cfg = config.eilean; in
                 "m.identity_server" =  { "base_url" = "https://vector.im"; };
               };
             # ACAO required to allow element-web on any URL to request this json file
+            # set other headers due to https://github.com/yandex/gixy/blob/master/docs/en/plugins/addheaderredefinition.md
             in ''
-              add_header Content-Type application/json;
+              default_type application/json;
               add_header Access-Control-Allow-Origin *;
+              add_header Strict-Transport-Security max-age=31536000 always;
+              add_header X-Frame-Options SAMEORIGIN always;
+              add_header X-Content-Type-Options nosniff always;
+              add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; frame-src 'self'; frame-ancestors 'self'; form-action 'self';" always;
+              add_header Referrer-Policy 'same-origin';
               return 200 '${builtins.toJSON client}';
             '';
         };
