@@ -2,7 +2,8 @@
 # Eilean
 
 <div align="center">
-    <img src="./eilean.png" width="400"/>
+	<img src="./eilean-donan.jpg" alt="Eilean Donan" width="400"/>
+    <!-- Photo by DAVID ILIFF. License: CC BY-SA 3.0 -->
 </div>
 
 Eilean enables you to host your own digital island where you control your own online infrastructure.
