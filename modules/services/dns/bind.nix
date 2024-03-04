@@ -24,8 +24,17 @@ lib.mkIf (cfg.enable && cfg.server == "bind") {
   systemd.services.bind.preStart =
     let ops =
       let mapZones = zonename: zone:
-        "cp ${import ./zonefile.nix { inherit pkgs config lib zonename zone; }}/${zonename}" +
-        " ${config.services.bind.directory}/${zonename}";
+        let
+          zonefile = "${import ./zonefile.nix { inherit pkgs config lib zonename zone; }}/${zonename}";
+          path = "${config.services.bind.directory}/${zonename}";
+        in ''
+          if ! diff ${zonefile} ${path} > /dev/null; then
+            cp ${zonefile} ${path}
+            # remove journal file to avoid 'journal out of sync with zone'
+            # NB this will reset dynamic updates
+            rm -f ${path}.signed.jnl
+          fi
+        '';
       in lib.attrsets.mapAttrsToList mapZones cfg.zones;
     in builtins.concatStringsSep "\n" ops;
 }
