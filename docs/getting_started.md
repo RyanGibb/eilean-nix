@@ -21,14 +21,14 @@ You can use this referral link to get started on Hetzner: https://hetzner.cloud/
 Note you'll need a static IPv4[^1] address for reliable hosting[^2]. If you're behind Network Address Translation (NAT) you'll need to set up port forwarding for every service you want to run.
 
 The resource requirements depend on the number of services you want to run, and the load they'll be under.
-With no services 10GiB of disk space and 1GiB of RAM is plenty, though you may want to enable swap if you have low memory.
-With all services enabled and fairly populated databases 40GiB of disk space and 2GiB of RAM is appropriate.
+With no services 10 GiB of disk space and 1 GiB of RAM is plenty, though you may want to enable swap if you have low memory.
+With all services enabled and fairly populated databases 40 GiB of disk space and 2 GiB of RAM is appropriate.
 
 [^1]: You could just use an IPv6 address, but much of the Internet is still [IPv4-only](https://stats.labs.apnic.net/ipv6).
 
 [^2]: If you don't have a static address, Dynamic DNS is possible but takes some time to propagate. Email reputation is tied to your IP address; using a residential address assigned by your ISP may get your mail blocked.
 
-Resource requirements depends how many service you want to run and how much load they'll be under, but 2 GiB RAM and 20 GiB disk should be a good starting point.
+Resource requirements depend on how many services you want to run and how much load they'll be under, but 2 GiB RAM and 20 GiB disk should be a good starting point.
 
 ## Step 2: Install NixOS with Eilean
 
@@ -95,7 +95,7 @@ You should be able to edit `/etc/nixos/configuration.nix` and rebuild you system
 
 [^4]: [github.com/NixOS/nixpkgs/issues/55424](https://github.com/NixOS/nixpkgs/issues/55424)
 
-By default DHCP will be enabled so your machine will discovery it's IP address, however some providers don't enable DHCPv6 or SLAAC so you need to manually configure the IP address.
+By default, DHCP will be enabled, so your machine will discover its IP address, however some providers don't enable DHCPv6 or SLAAC, so you need to manually configure the IP address.
 For example a Hetzner VPS IPv6 address can be found in the networking tab and enabled with:
 ```
   networking = {
@@ -146,7 +146,7 @@ dig <domain>
 
 ## Step 4: Configure Eilean
 
-Once your domain is setup, replace these default values of Eilean with your IPv4 and IPv6 network addresses, and your public network interface:
+Once your domain is set up, replace these default values of Eilean with your IPv4 and IPv6 network addresses, and your public network interface:
 ```
   eilean.serverIpv4 = "203.0.113.0";
   eilean.serverIpv6 = "2001:DB8:0:0:0:0:0:0";
