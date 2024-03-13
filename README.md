@@ -2,7 +2,7 @@
 # Eilean
 
 <div align="center">
-	<img src="./eilean-donan.jpg" alt="Eilean Donan" width="400"/>
+       <img src="./eilean-donan.jpg" alt="Eilean Donan"/>
     <!-- Photo by DAVID ILIFF. License: CC BY-SA 3.0 -->
 </div>
 
