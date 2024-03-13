@@ -10,7 +10,10 @@ with lib;
     ./mailserver.nix
     ./gitea.nix
     ./dns.nix
-    ./matrix.nix
+    ./matrix/synapse.nix
+    ./matrix/mautrix-signal.nix
+    ./matrix/mautrix-instagram.nix
+    ./matrix/mautrix-messenger.nix
     ./turn.nix
     ./headscale.nix
     ./wireguard/server.nix
