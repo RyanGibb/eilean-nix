@@ -1,7 +1,6 @@
 { pkgs, config, lib, ... }:
 
 with lib;
-
 let
   zoneOptions.options = {
     ttl = mkOption {
@@ -64,7 +63,7 @@ in
   imports = [ ./bind.nix ];
 
   options.eilean.services.dns = {
-    enable = lib.mkEnableOption "DNS server";
+    enable = mkEnableOption "DNS server";
     server = mkOption {
       type = types.enum [ "bind" ];
       default = "bind";
@@ -78,7 +77,7 @@ in
     };
   };
 
-  config.networking.firewall = lib.mkIf config.eilean.services.dns.openFirewall {
+  config.networking.firewall = mkIf config.eilean.services.dns.openFirewall {
     allowedTCPPorts = [ 53 ];
     allowedUDPPorts = [ 53 ];
   };

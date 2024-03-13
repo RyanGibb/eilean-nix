@@ -1,35 +1,32 @@
-{ config, lib, ... }:
+{ pkgs, config, lib, ... }:
 
+with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
 in {
-  options.eilean.mailserver.enable = lib.mkEnableOption "mailserver";
+  options.eilean.mailserver = {
+    enable = mkEnableOption "mailserver";
+    systemAccountPasswordFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+    };
+  };
 
-  config = lib.mkIf cfg.mailserver.enable {
+  config = mkIf cfg.mailserver.enable {
     mailserver = {
       enable = true;
       fqdn = "mail.${domain}";
       domains = [ "${domain}" ];
 
-      # A list of all login accounts. To create the password hashes, use
-      # nix run nixpkgs.apacheHttpd -c htpasswd -nbB "" "super secret password" | cut -d: -f2
       loginAccounts = {
-          "${cfg.username}@${domain}" = {
-              hashedPasswordFile = "${config.eilean.secretsDir}/email-pswd";
-              aliases = [
-                "dns@${domain}"
-                "postmaster@${domain}"
-              ];
-          };
-          "misc@${domain}" = {
-              hashedPasswordFile = "${config.eilean.secretsDir}/email-pswd";
-              aliases = [
-                "git@${domain}"
-                "mastodon@${domain}"
-              ];
-              catchAll = [ "${domain}" ];
-          };
+        "system@${domain}" = {
+          passwordFile = cfg.mailserver.systemAccountPasswordFile;
+          aliases = [
+            (mkIf cfg.gitea.enable "git@${domain}")
+            (mkIf cfg.mastodon.enable "mastodon@${domain}")
+          ];
+        };
       };
 
       # Use Let's Encrypt certificates. Note that this needs to set up a stripped

@@ -1,7 +1,6 @@
 { pkgs, config, lib, ... }:
 
 with lib;
-
 let cfg = config.wireguard; in
 {
   options.wireguard = {
@@ -35,6 +34,10 @@ let cfg = config.wireguard; in
             type = with types; nullOr int;
             default = null;
           };
+          privateKeyFile = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+          };
         };
       };
       in mkOption {
@@ -65,7 +68,7 @@ let cfg = config.wireguard; in
               [ "${cfg.hosts."${hostName}".ip}/24" ]
             else [ ];
           listenPort = 51820; 
-          privateKeyFile = "${config.eilean.secretsDir}/wireguard-key-${hostName}";
+          privateKeyFile = cfg.hosts."${hostName}".privateKeyFile;
           peers =
             let
               serverPeers = attrsets.mapAttrsToList

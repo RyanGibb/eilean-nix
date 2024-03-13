@@ -67,8 +67,6 @@
     # mastodon.enable = true;
     # gitea.enable = true;
     # headscale.enable = true;
-
-    # secretsDir = "/secrets";
   };
 
   # This value determines the NixOS release from which the default
