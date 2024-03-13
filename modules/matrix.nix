@@ -1,16 +1,24 @@
 { config, pkgs, lib, ... }:
 
-let cfg = config.eilean; in
+with lib;
+let
+  cfg = config.eilean;
+  turnSharedSecretFile = "/run/matrix-synapse/turn-shared-secret";
+in
 {
   options.eilean.matrix = {
-    enable = lib.mkEnableOption "matrix";
-    turn = lib.mkOption {
-      type = lib.types.bool;
+    enable = mkEnableOption "matrix";
+    turn = mkOption {
+      type = types.bool;
       default = true;
+    };
+    registrationSecretFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
     };
   };
 
-  config = lib.mkIf cfg.matrix.enable {
+  config = mkIf cfg.matrix.enable {
     services.postgresql.enable = true;
     services.postgresql.package = pkgs.postgresql_13;
     services.postgresql.initialScript = pkgs.writeText "synapse-init.sql" ''
@@ -89,12 +97,12 @@ let cfg = config.eilean; in
 
     services.matrix-synapse = {
       enable = true;
-      settings = lib.mkMerge [
+      settings = mkMerge [
         {
           server_name = config.networking.domain;
           enable_registration = true;
           registration_requires_token = true;
-          registration_shared_secret_path = "${config.eilean.secretsDir}/matrix-shared-secret";
+          registration_shared_secret_path = cfg.matrix.registrationSecretFile;
           listeners = [
             {
               port = 8008;
@@ -112,7 +120,7 @@ let cfg = config.eilean; in
           ];
           max_upload_size = "100M";
         }
-        (lib.mkIf cfg.matrix.turn {
+        (mkIf cfg.matrix.turn {
           turn_uris = with config.services.coturn; [
             "turn:${realm}:3478?transport=udp"
             "turn:${realm}:3478?transport=tcp"
@@ -122,10 +130,30 @@ let cfg = config.eilean; in
           turn_user_lifetime = "1h";
         })
       ];
-      extraConfigFiles = [ "${config.eilean.secretsDir}/matrix-turn-shared-secret" ];
+      extraConfigFiles = mkIf cfg.matrix.turn (
+        [ turnSharedSecretFile ]
+      );
     };
 
-    eilean.turn.enable = lib.mkIf cfg.matrix.turn true;
+    systemd.services = mkIf cfg.matrix.turn {
+      matrix-synapse-turn-shared-secret-generator = {
+        description = "Generate matrix synapse turn shared secret config file";
+        script = ''
+          mkdir -p "$(dirname '${turnSharedSecretFile}')"
+          echo "turn_shared_secret: $(cat '${cfg.turn.secretFile}')" > '${turnSharedSecretFile}'
+          chmod 770 '${turnSharedSecretFile}'
+          chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${turnSharedSecretFile}'
+        '';
+        serviceConfig.Type = "oneshot";
+        serviceConfig.RemainAfterExit = true;
+      };
+      "matrix-synapse" = {
+        after = [ "matrix-synapse-turn-shared-secret-generator.service" ];
+        requires = [ "matrix-synapse-turn-shared-secret-generator.service" ];
+      };
+    };
+
+    eilean.turn.enable = mkIf cfg.matrix.turn true;
 
     eilean.dns.enable = true;
     eilean.services.dns.zones.${config.networking.domain}.records = [

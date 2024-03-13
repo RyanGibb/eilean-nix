@@ -1,20 +1,21 @@
 { config, lib, ... }:
 
+with lib;
 let cfg = config.eilean; in
 {
   
   options.eilean.dns = {
-    enable = lib.mkEnableOption "dns";
-    nameservers = lib.mkOption {
-      type = lib.types.listOf lib.types.string;
+    enable = mkEnableOption "dns";
+    nameservers = mkOption {
+      type = types.listOf types.str;
       default = [ "ns1" "ns2" ];
     };
   };
   
-  config.eilean.services.dns = lib.mkIf cfg.dns.enable {
+  config.eilean.services.dns = mkIf cfg.dns.enable {
     enable = true;
     zones.${config.networking.domain} = {
-      soa.serial = lib.mkDefault 0;
+      soa.serial = mkDefault 0;
       records = builtins.concatMap (ns: [
         {
           name = "@";

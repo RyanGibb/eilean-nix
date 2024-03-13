@@ -1,12 +1,15 @@
 { pkgs, config, lib, ... }:
 
+with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
 in {
-  options.eilean.mastodon.enable = lib.mkEnableOption "mastodon";
+  options.eilean.mastodon = {
+    enable = mkEnableOption "mastodon";
+  };
 
-  config = lib.mkIf cfg.mastodon.enable {
+  config = mkIf cfg.mastodon.enable {
     services.mastodon = {
       enable = true;
       enableUnixSocket = false;
@@ -16,11 +19,11 @@ in {
       streamingProcesses = 3;
       smtp = {
         #createLocally = false;
-        user = "misc@${domain}";
+        user = "system@${domain}";
         port = 465;
         host = "mail.${domain}";
         authenticate = true;
-        passwordFile = "${config.eilean.secretsDir}/email-pswd-unhashed";
+        passwordFile = cfg.mailserver.systemAccountPasswordFile;
         fromAddress = "mastodon@${domain}";
       };
       extraConfig = {

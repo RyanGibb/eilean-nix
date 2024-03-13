@@ -1,5 +1,6 @@
 { pkgs, config, lib, ... }:
 
+with lib;
 let
   cfg = config.eilean;
 in {
@@ -15,7 +16,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.headscale.enable {
+  config = mkIf cfg.headscale.enable {
     # To set up:
     #   `headscale namespaces create <namespace_name>`
     # To add a node:

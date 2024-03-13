@@ -67,32 +67,24 @@ in
             description = "Username";
           };
 
-          hashedPassword = mkOption {
+          password = mkOption {
             type = with types; nullOr str;
             default = null;
             example = "$6$evQJs5CFQyPAW09S$Cn99Y8.QjZ2IBnSu4qf1vBxDRWkaIZWOtmu1Ddsm3.H3CFpeVc0JU4llIq8HQXgeatvYhh5O33eWG3TSpjzu6/";
             description = ''
-              The user's hashed password. Use `htpasswd` as follows
-
-              ```
-              nix run nixpkgs.apacheHttpd -c htpasswd -nbB "" "super secret password" | cut -d: -f2
-              ```
+              The password.
 
               Warning: this is stored in plaintext in the Nix store!
-              Use `hashedPasswordFile` instead.
+              Use `passwordFile` instead.
             '';
           };
 
-          hashedPasswordFile = mkOption {
+          passwordFile = mkOption {
             type = with types; nullOr path;
             default = null;
             example = "/run/keys/user1-passwordhash";
             description = ''
-              A file containing the user's hashed password. Use `htpasswd` as follows
-
-              ```
-              nix run nixpkgs.apacheHttpd -c htpasswd -nbB "" "super secret password" | cut -d: -f2
-              ```
+              A file containing the user's password.
             '';
           };
 
@@ -176,10 +168,10 @@ in
       }));
       example = {
         user1 = {
-          hashedPassword = "$6$evQJs5CFQyPAW09S$Cn99Y8.QjZ2IBnSu4qf1vBxDRWkaIZWOtmu1Ddsm3.H3CFpeVc0JU4llIq8HQXgeatvYhh5O33eWG3TSpjzu6/";
+          password = "$6$evQJs5CFQyPAW09S$Cn99Y8.QjZ2IBnSu4qf1vBxDRWkaIZWOtmu1Ddsm3.H3CFpeVc0JU4llIq8HQXgeatvYhh5O33eWG3TSpjzu6/";
         };
         user2 = {
-          hashedPassword = "$6$oE0ZNv2n7Vk9gOf$9xcZWCCLGdMflIfuA0vR1Q1Xblw6RZqPrP94mEit2/81/7AKj2bqUai5yPyWE.QYPyv6wLMHZvjw3Rlg7yTCD/";
+          password = "$6$oE0ZNv2n7Vk9gOf$9xcZWCCLGdMflIfuA0vR1Q1Xblw6RZqPrP94mEit2/81/7AKj2bqUai5yPyWE.QYPyv6wLMHZvjw3Rlg7yTCD/";
         };
       };
       description = ''

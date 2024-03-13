@@ -1,20 +1,27 @@
 { config, pkgs, lib, ... }:
 
+with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
 in
 {
-  options.eilean.turn.enable = lib.mkEnableOption "TURN server";
+  options.eilean.turn = {
+    enable = mkEnableOption "TURN server";
+    secretFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+    };
+  };
 
-  config = lib.mkIf cfg.turn.enable {
+  config = mkIf cfg.turn.enable {
     services.coturn = rec {
       enable = true;
       no-cli = true;
       no-tcp-relay = true;
       secure-stun = true;
       use-auth-secret = true;
-      static-auth-secret-file = "${config.eilean.secretsDir}/coturn";
+      static-auth-secret-file = "${cfg.turn.secretFile}";
       realm = "turn.${domain}";
       relay-ips = with config.eilean; [
         serverIpv4

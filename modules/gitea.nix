@@ -1,18 +1,23 @@
 { pkgs, config, lib, ... }:
 
+with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
 in {
   options.eilean.gitea = {
-    enable = lib.mkEnableOption "gitea";
-    sshPort = lib.mkOption {
-      type = lib.types.int;
+    enable = mkEnableOption "gitea";
+    sshPort = mkOption {
+      type = types.int;
       default = 3001;
+    };
+    databasePasswordFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
     };
   };
 
-  config = lib.mkIf cfg.gitea.enable {
+  config = mkIf cfg.gitea.enable {
     services.nginx = {
       enable = true;
       recommendedProxySettings = true;
@@ -37,7 +42,7 @@ in {
       enable = true;
       user = "git";
       appName = "git | ${domain}";
-      mailerPasswordFile = "${config.eilean.secretsDir}/email-pswd-unhashed";
+      mailerPasswordFile = cfg.mailserver.systemAccountPasswordFile;
       settings = {
         server = {
           ROOT_URL = "https://git.${domain}/";
@@ -48,7 +53,7 @@ in {
           FROM = "git@${domain}";
           MAILER_TYPE = "smtp";
           HOST = "mail.${domain}:465";
-          USER = "misc@${domain}";
+          USER = "system@${domain}";
           IS_TLS_ENABLED = true;
         };
         repository.DEFAULT_BRANCH = "main";
@@ -57,7 +62,7 @@ in {
       };
       database = {
         type = "postgres";
-        passwordFile = "${config.eilean.secretsDir}/gitea-db";
+        passwordFile = cfg.gitea.databasePasswordFile;
         user = "git";
         name = "git";
         #createDatabase = true;
@@ -69,21 +74,21 @@ in {
     # https://github.com/NixOS/nixpkgs/issues/103446
     systemd.services.gitea.serviceConfig = {
       ReadWritePaths = [ "/var/lib/postfix/queue/maildrop" ];
-      NoNewPrivileges = lib.mkForce false;
-      PrivateDevices = lib.mkForce false;
-      PrivateUsers = lib.mkForce false;
-      ProtectHostname = lib.mkForce false;
-      ProtectClock = lib.mkForce false;
-      ProtectKernelTunables = lib.mkForce false;
-      ProtectKernelModules = lib.mkForce false;
-      ProtectKernelLogs = lib.mkForce false;
-      RestrictAddressFamilies = lib.mkForce [ ];
-      LockPersonality = lib.mkForce false;
-      MemoryDenyWriteExecute = lib.mkForce false;
-      RestrictRealtime = lib.mkForce false;
-      RestrictSUIDSGID = lib.mkForce false;
-      SystemCallArchitectures = lib.mkForce "";
-      SystemCallFilter = lib.mkForce [];
+      NoNewPrivileges = mkForce false;
+      PrivateDevices = mkForce false;
+      PrivateUsers = mkForce false;
+      ProtectHostname = mkForce false;
+      ProtectClock = mkForce false;
+      ProtectKernelTunables = mkForce false;
+      ProtectKernelModules = mkForce false;
+      ProtectKernelLogs = mkForce false;
+      RestrictAddressFamilies = mkForce [ ];
+      LockPersonality = mkForce false;
+      MemoryDenyWriteExecute = mkForce false;
+      RestrictRealtime = mkForce false;
+      RestrictSUIDSGID = mkForce false;
+      SystemCallArchitectures = mkForce "";
+      SystemCallFilter = mkForce [];
     };
 
     eilean.dns.enable = true;
