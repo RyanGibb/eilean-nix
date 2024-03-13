@@ -4,14 +4,11 @@ with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
+  staticAuthSecretFile = "/run/coturn/static-auth-secret";
 in
 {
   options.eilean.turn = {
     enable = mkEnableOption "TURN server";
-    secretFile = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-    };
   };
 
   config = mkIf cfg.turn.enable {
@@ -21,7 +18,7 @@ in
       no-tcp-relay = true;
       secure-stun = true;
       use-auth-secret = true;
-      static-auth-secret-file = "${cfg.turn.secretFile}";
+      static-auth-secret-file = staticAuthSecretFile;
       realm = "turn.${domain}";
       relay-ips = with config.eilean; [
         serverIpv4
@@ -29,6 +26,25 @@ in
       ];
       cert = "${config.security.acme.certs.${realm}.directory}/full.pem";
       pkey = "${config.security.acme.certs.${realm}.directory}/key.pem";
+    };
+
+    systemd.services = {
+      coturn-static-auth-secret-generator = {
+        description = "Generate coturn static auth secret file";
+        script = ''
+          if [ ! -f '${staticAuthSecretFile}' ]; then
+            umask 077
+            tr -dc A-Za-z0-9 </dev/urandom | head -c 32 > '${staticAuthSecretFile}'
+            chown ${config.systemd.services.coturn.serviceConfig.User}:${config.systemd.services.coturn.serviceConfig.Group} '${staticAuthSecretFile}'
+          fi
+        '';
+        serviceConfig.Type = "oneshot";
+        serviceConfig.RemainAfterExit = true;
+      };
+      "coturn" = {
+        after = [ "coturn-static-auth-secret-generator.service" ];
+        requires = [ "coturn-static-auth-secret-generator.service" ];
+      };
     };
 
     networking.firewall =

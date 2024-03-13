@@ -140,12 +140,14 @@ in
         description = "Generate matrix synapse turn shared secret config file";
         script = ''
           mkdir -p "$(dirname '${turnSharedSecretFile}')"
-          echo "turn_shared_secret: $(cat '${cfg.turn.secretFile}')" > '${turnSharedSecretFile}'
+          echo "turn_shared_secret: $(cat '${config.services.coturn.static-auth-secret-file}')" > '${turnSharedSecretFile}'
           chmod 770 '${turnSharedSecretFile}'
           chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${turnSharedSecretFile}'
         '';
         serviceConfig.Type = "oneshot";
         serviceConfig.RemainAfterExit = true;
+        after = [ "coturn-static-auth-secret-generator.service" ];
+        requires = [ "coturn-static-auth-secret-generator.service" ];
       };
       "matrix-synapse" = {
         after = [ "matrix-synapse-turn-shared-secret-generator.service" ];
