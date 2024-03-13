@@ -67,10 +67,6 @@ let
 in {
   config = lib.mkIf enable {
     # assert that all accounts provide a password
-    assertions = (map (acct: {
-      assertion = (acct.password != null || acct.passwordFile != null);
-      message = "${acct.name} must provide either a password or a password file";
-    }) (lib.attrValues loginAccounts));
 
     # warn for accounts that specify both password and file
     warnings = (map

@@ -163,4 +163,5 @@ It's a good idea to enable one service at a time initially or else if you run in
 
 ## Further Information 
 
-See [docs](../docs/).
+For a list of options, use `man eilean-configuration.nix`.
+

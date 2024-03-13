@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ pkgs, lib, config, ... }:
 
 with lib;
 
@@ -16,7 +16,6 @@ with lib;
     ./matrix/mautrix-messenger.nix
     ./turn.nix
     ./headscale.nix
-    ./wireguard/server.nix
     ./wireguard/default.nix
   ];
 
@@ -36,6 +35,10 @@ with lib;
   };
 
   config = {
+    # install manpage
+    environment.systemPackages = [
+      (import ../man/default.nix { inherit pkgs; system = config.nixpkgs.hostPlatform.system; })
+    ];
     security.acme.defaults.email = "${config.eilean.username}@${config.networking.domain}";
     networking.firewall.allowedTCPPorts = mkIf config.services.nginx.enable [
       80 # HTTP

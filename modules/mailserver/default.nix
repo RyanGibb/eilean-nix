@@ -669,7 +669,7 @@ in
         if (ip == "0.0.0.0" || ip == "::")
         then "127.0.0.1"
         else if isIpv6 ip then "[${ip}]" else ip;
-        defaultText = lib.literalDocBook "computed from <option>config.services.redis.servers.rspamd.bind</option>";
+        defaultText = lib.literalMD "computed from <option>config.services.redis.servers.rspamd.bind</option>";
         description = ''
           Address that rspamd should use to contact redis.
         '';
@@ -795,7 +795,7 @@ in
                 start program = "${pkgs.systemd}/bin/systemctl start rspamd"
                 stop program = "${pkgs.systemd}/bin/systemctl stop rspamd"
         '';
-        defaultText = lib.literalDocBook "see source";
+        defaultText = lib.literalMD "see source";
         description = ''
           The configuration used for monitoring via monit.
           Use a mail address that you actively check and set it via 'set alert ...'.

@@ -8,11 +8,13 @@ in {
     enable = mkEnableOption "headscale";
     zone = mkOption {
       type = types.str;
-      default = "${config.networking.domain}";
+      default = config.networking.domain;
+      defaultText = "config.networking.domain";
     };
     domain = mkOption {
       type = types.str;
       default = "headscale.${config.networking.domain}";
+      defaultText = "headscale.$${config.networking.domain}";
     };
   };
 

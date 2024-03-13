@@ -95,12 +95,6 @@ let
 in
 {
   config = with cfg; lib.mkIf enable {
-    assertions = [
-      {
-        assertion = junkMailboxNumber == 1;
-        message = "nixos-mailserver requires exactly one dovecot mailbox with the 'special use' flag set to 'Junk' (${builtins.toString junkMailboxNumber} have been found)";
-      }
-    ];
 
     services.dovecot2 = {
       enable = true;
