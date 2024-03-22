@@ -31,7 +31,7 @@ in {
 
       # Use Let's Encrypt certificates. Note that this needs to set up a stripped
       # down nginx and opens port 80.
-      certificateScheme = 3;
+      certificateScheme = "acme-nginx";
 
       localDnsResolver = false;
     };
@@ -40,6 +40,13 @@ in {
     services.nginx.virtualHosts."${config.mailserver.fqdn}".extraConfig = ''
       return 301 $scheme://${domain}$request_uri;
     '';
+
+    services.postfix.config = {
+      smtpd_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtp_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtpd_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtp_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+    };
 
     eilean.dns.enable = true;
     eilean.services.dns.zones.${config.networking.domain}.records = [

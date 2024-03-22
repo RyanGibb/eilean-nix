@@ -5,7 +5,6 @@ with lib;
 {
   imports = [
     ./services/dns/default.nix
-    ./mailserver/default.nix
     ./mastodon.nix
     ./mailserver.nix
     ./gitea.nix
@@ -35,9 +34,8 @@ with lib;
   };
 
   config = {
-    # install manpage
+    # TODO install manpage
     environment.systemPackages = [
-      (import ../man/default.nix { inherit pkgs; system = config.nixpkgs.hostPlatform.system; })
     ];
     security.acme.defaults.email = "${config.eilean.username}@${config.networking.domain}";
     networking.firewall.allowedTCPPorts = mkIf config.services.nginx.enable [

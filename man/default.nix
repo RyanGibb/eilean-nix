@@ -1,4 +1,4 @@
-{ pkgs, system, ... }:
+{ pkgs, system, nixos-mailserver, ... }:
 
 with pkgs;
 let
@@ -8,6 +8,7 @@ let
           inherit system;
           modules = [
             ../modules/default.nix
+            nixos-mailserver
           ];
         };
       in pkgs.nixosOptionsDoc {
