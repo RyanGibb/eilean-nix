@@ -25,7 +25,9 @@ in {
         enableACME = true;
         forceSSL = true;
         locations."/" = {
-          proxyPass = "http://localhost:${builtins.toString config.services.gitea.settings.server.HTTP_PORT}/";
+          proxyPass = "http://localhost:${
+              builtins.toString config.services.gitea.settings.server.HTTP_PORT
+            }/";
         };
       };
     };
@@ -88,17 +90,15 @@ in {
       RestrictRealtime = mkForce false;
       RestrictSUIDSGID = mkForce false;
       SystemCallArchitectures = mkForce "";
-      SystemCallFilter = mkForce [];
+      SystemCallFilter = mkForce [ ];
     };
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${config.networking.domain}.records = [
-      {
-        name = "git";
-        type = "CNAME";
-        data = "vps";
-      }
-    ];
+    eilean.services.dns.zones.${config.networking.domain}.records = [{
+      name = "git";
+      type = "CNAME";
+      data = "vps";
+    }];
 
     # proxy port 22 on ethernet interface to internal gitea ssh server
     # openssh server remains accessible on port 22 via vpn(s)
@@ -110,18 +110,23 @@ in {
     };
 
     networking.firewall = {
-      allowedTCPPorts = [
-        22
-        cfg.gitea.sshPort
-      ];
+      allowedTCPPorts = [ 22 cfg.gitea.sshPort ];
       extraCommands = ''
         # proxy all traffic on public interface to the gitea SSH server
-        iptables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
-        ip6tables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
+        iptables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${
+          builtins.toString cfg.gitea.sshPort
+        }
+        ip6tables -A PREROUTING -t nat -i ${config.eilean.publicInterface} -p tcp --dport 22 -j REDIRECT --to-port ${
+          builtins.toString cfg.gitea.sshPort
+        }
 
         # proxy locally originating outgoing packets
-        iptables -A OUTPUT -d ${config.eilean.serverIpv4} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
-        ip6tables -A OUTPUT -d ${config.eilean.serverIpv6} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${builtins.toString cfg.gitea.sshPort}
+        iptables -A OUTPUT -d ${config.eilean.serverIpv4} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${
+          builtins.toString cfg.gitea.sshPort
+        }
+        ip6tables -A OUTPUT -d ${config.eilean.serverIpv6} -t nat -p tcp --dport 22 -j REDIRECT --to-port ${
+          builtins.toString cfg.gitea.sshPort
+        }
       '';
     };
 

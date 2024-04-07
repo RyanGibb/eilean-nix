@@ -1,9 +1,9 @@
 { config, lib, ... }:
 
 with lib;
-let cfg = config.eilean; in
-{
-  
+let cfg = config.eilean;
+in {
+
   options.eilean.dns = {
     enable = mkEnableOption "dns";
     nameservers = mkOption {
@@ -11,7 +11,7 @@ let cfg = config.eilean; in
       default = [ "ns1" "ns2" ];
     };
   };
-  
+
   config.eilean.services.dns = mkIf cfg.dns.enable {
     enable = true;
     zones.${config.networking.domain} = {
@@ -37,8 +37,7 @@ let cfg = config.eilean; in
           type = "AAAA";
           data = cfg.serverIpv6;
         }
-      ]) cfg.dns.nameservers ++
-      [
+      ]) cfg.dns.nameservers ++ [
         {
           name = "@";
           type = "A";
@@ -60,7 +59,7 @@ let cfg = config.eilean; in
           type = "AAAA";
           data = cfg.serverIpv6;
         }
-        
+
         {
           name = "@";
           type = "LOC";

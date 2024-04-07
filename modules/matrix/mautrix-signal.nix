@@ -1,15 +1,13 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}: let
+{ lib, config, pkgs, ... }:
+let
   cfg = config.services.mautrix-signal;
   dataDir = "/var/lib/mautrix-signal";
   registrationFile = "${dataDir}/signal-registration.yaml";
   settingsFile = "${dataDir}/config.json";
-  settingsFileUnsubstituted = settingsFormat.generate "mautrix-signal-config-unsubstituted.json" cfg.settings;
-  settingsFormat = pkgs.formats.json {};
+  settingsFileUnsubstituted =
+    settingsFormat.generate "mautrix-signal-config-unsubstituted.json"
+    cfg.settings;
+  settingsFormat = pkgs.formats.json { };
   appservicePort = 29328;
 
   mkDefaults = lib.mapAttrsRecursive (n: v: lib.mkDefault v);
@@ -32,8 +30,8 @@
     };
     bridge = {
       username_template = "signal_{{.}}";
-      double_puppet_server_map = {};
-      login_shared_secret_map = {};
+      double_puppet_server_map = { };
+      login_shared_secret_map = { };
       permissions."*" = "relay";
     };
     logging = {
@@ -48,7 +46,8 @@
 
 in {
   options.services.mautrix-signal = {
-    enable = lib.mkEnableOption (lib.mdDoc "mautrix-signal, a puppeting/relaybot bridge between Matrix and Signal.");
+    enable = lib.mkEnableOption (lib.mdDoc
+      "mautrix-signal, a puppeting/relaybot bridge between Matrix and Signal.");
 
     settings = lib.mkOption {
       type = settingsFormat.type;
@@ -68,9 +67,7 @@ in {
           ephemeral_events = false;
         };
         bridge = {
-          history_sync = {
-            request_full_sync = true;
-          };
+          history_sync = { request_full_sync = true; };
           private_chat_portal_meta = true;
           mute_bridging = true;
           encryption = {
@@ -78,19 +75,16 @@ in {
             default = true;
             require = true;
           };
-          provisioning = {
-            shared_secret = "disable";
-          };
-          permissions = {
-            "example.com" = "user";
-          };
+          provisioning = { shared_secret = "disable"; };
+          permissions = { "example.com" = "user"; };
         };
       };
     };
 
     serviceDependencies = lib.mkOption {
       type = with lib.types; listOf str;
-      default = lib.optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnit;
+      default = lib.optional config.services.matrix-synapse.enable
+        config.services.matrix-synapse.serviceUnit;
       defaultText = lib.literalExpression ''
         optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnits
       '';
@@ -111,12 +105,14 @@ in {
       description = "Mautrix-Signal bridge user";
     };
 
-    users.groups.mautrix-signal = {};
+    users.groups.mautrix-signal = { };
 
     services.mautrix-signal.settings = lib.mkMerge (map mkDefaults [
       defaultConfig
       # Note: this is defined here to avoid the docs depending on `config`
-      { homeserver.domain = config.services.matrix-synapse.settings.server_name; }
+      {
+        homeserver.domain = config.services.matrix-synapse.settings.server_name;
+      }
     ]);
 
     systemd.services.mautrix-signal = {
@@ -126,9 +122,10 @@ in {
       # voice messages need `ffmpeg`
       path = [ pkgs.ffmpeg ];
 
-      wantedBy = ["multi-user.target"];
-      wants = ["network-online.target"] ++ cfg.serviceDependencies;
-      after = ["network-online.target" "signald.service"] ++ cfg.serviceDependencies;
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ] ++ cfg.serviceDependencies;
+      after = [ "network-online.target" "signald.service" ]
+        ++ cfg.serviceDependencies;
 
       preStart = ''
         # substitute the settings file by environment variables
@@ -190,11 +187,11 @@ in {
         RestrictSUIDSGID = true;
         SystemCallArchitectures = "native";
         SystemCallErrorNumber = "EPERM";
-        SystemCallFilter = ["@system-service"];
+        SystemCallFilter = [ "@system-service" ];
         Type = "simple";
-        UMask = 0027;
+        UMask = 27;
       };
-      restartTriggers = [settingsFileUnsubstituted];
+      restartTriggers = [ settingsFileUnsubstituted ];
     };
   };
 }

@@ -20,7 +20,8 @@ buildGoModule rec {
 
   meta = with lib; {
     homepage = "https://github.com/mautrix/meta";
-    description = " A Matrix-Facebook Messenger and Instagram DM puppeting bridge.";
+    description =
+      " A Matrix-Facebook Messenger and Instagram DM puppeting bridge.";
     license = licenses.agpl3Plus;
     mainProgram = "mautrix-meta";
   };

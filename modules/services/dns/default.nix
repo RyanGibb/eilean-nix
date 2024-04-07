@@ -17,9 +17,7 @@ let
         default = "dns";
       };
       # TODO auto increment
-      serial = mkOption {
-        type = types.int;
-      };
+      serial = mkOption { type = types.int; };
       refresh = mkOption {
         type = types.int;
         default = 3600; # 1hr
@@ -37,29 +35,22 @@ let
         default = 3600; # 1hr
       };
     };
-    records =
-      let recordOpts.options = {
-        name = mkOption {
-          type = types.str;
-        };
+    records = let
+      recordOpts.options = {
+        name = mkOption { type = types.str; };
         ttl = mkOption {
           type = with types; nullOr int;
           default = null;
         };
-        type = mkOption {
-          type = types.str;
-        };
-        data = mkOption {
-          type = types.str;
-        };
+        type = mkOption { type = types.str; };
+        data = mkOption { type = types.str; };
       };
-      in mkOption {
-        type = with types; listOf (submodule recordOpts);
-        default = [ ];
-      };
+    in mkOption {
+      type = with types; listOf (submodule recordOpts);
+      default = [ ];
+    };
   };
-in
-{
+in {
   imports = [ ./bind.nix ];
 
   options.eilean.services.dns = {
@@ -72,9 +63,7 @@ in
       type = types.bool;
       default = true;
     };
-    zones = mkOption {
-      type = with types; attrsOf (submodule zoneOptions);
-    };
+    zones = mkOption { type = with types; attrsOf (submodule zoneOptions); };
   };
 
   config.networking.firewall = mkIf config.eilean.services.dns.openFirewall {

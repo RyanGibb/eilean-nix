@@ -19,25 +19,17 @@ with lib;
   ];
 
   options.eilean = with types; {
-    username = mkOption {
-      type = str;
-    };
-    serverIpv4 = mkOption {
-      type = str;
-    };
-    serverIpv6 = mkOption {
-      type = str;
-    };
-    publicInterface = mkOption {
-      type = str;
-    };
+    username = mkOption { type = str; };
+    serverIpv4 = mkOption { type = str; };
+    serverIpv6 = mkOption { type = str; };
+    publicInterface = mkOption { type = str; };
   };
 
   config = {
     # TODO install manpage
-    environment.systemPackages = [
-    ];
-    security.acme.defaults.email = "${config.eilean.username}@${config.networking.domain}";
+    environment.systemPackages = [ ];
+    security.acme.defaults.email =
+      "${config.eilean.username}@${config.networking.domain}";
     networking.firewall.allowedTCPPorts = mkIf config.services.nginx.enable [
       80 # HTTP
       443 # HTTPS

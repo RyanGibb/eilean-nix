@@ -1,8 +1,7 @@
 { pkgs, config, lib, ... }:
 
 with lib;
-let
-  cfg = config.eilean;
+let cfg = config.eilean;
 in {
   options.eilean.headscale = with lib; {
     enable = mkEnableOption "headscale";
@@ -14,7 +13,7 @@ in {
     domain = mkOption {
       type = types.str;
       default = "headscale.${config.networking.domain}";
-      defaultText = "headscale.$${config.networking.domain}";
+      defaultText = "headscale.$\${config.networking.domain}";
     };
   };
 
@@ -30,10 +29,7 @@ in {
       settings = {
         server_url = "https://${cfg.headscale.domain}";
         logtail.enabled = false;
-        ip_prefixes = [
-          "100.64.0.0/10"
-          "fd7a:115c:a1e0::/48"
-        ];
+        ip_prefixes = [ "100.64.0.0/10" "fd7a:115c:a1e0::/48" ];
         dns_config = {
           # magicDns = true;
           nameservers = config.networking.nameservers;
@@ -58,12 +54,10 @@ in {
     environment.systemPackages = [ config.services.headscale.package ];
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${cfg.headscale.zone}.records = [
-      {
-        name = "${cfg.headscale.domain}.";
-        type = "CNAME";
-        data = "vps";
-      }
-    ];
+    eilean.services.dns.zones.${cfg.headscale.zone}.records = [{
+      name = "${cfg.headscale.domain}.";
+      type = "CNAME";
+      data = "vps";
+    }];
   };
 }

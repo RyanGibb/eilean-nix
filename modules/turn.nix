@@ -5,11 +5,8 @@ let
   cfg = config.eilean;
   domain = config.networking.domain;
   staticAuthSecretFile = "/run/coturn/static-auth-secret";
-in
-{
-  options.eilean.turn = {
-    enable = mkEnableOption "TURN server";
-  };
+in {
+  options.eilean.turn = { enable = mkEnableOption "TURN server"; };
 
   config = mkIf cfg.turn.enable {
     services.coturn = rec {
@@ -20,10 +17,7 @@ in
       use-auth-secret = true;
       static-auth-secret-file = staticAuthSecretFile;
       realm = "turn.${domain}";
-      relay-ips = with config.eilean; [
-        serverIpv4
-        serverIpv6
-      ];
+      relay-ips = with config.eilean; [ serverIpv4 serverIpv6 ];
       cert = "${config.security.acme.certs.${realm}.directory}/full.pem";
       pkey = "${config.security.acme.certs.${realm}.directory}/key.pem";
     };
@@ -47,8 +41,7 @@ in
       };
     };
 
-    networking.firewall =
-      with config.services.coturn;
+    networking.firewall = with config.services.coturn;
       let
         turn-range = {
           from = min-port;
@@ -66,10 +59,11 @@ in
         allowedTCPPortRanges = [ turn-range ];
         allowedUDPPorts = stun-ports;
         allowedUDPPortRanges = [ turn-range ];
-    };
+      };
 
     security.acme.certs.${config.services.coturn.realm} = {
-      postRun = "systemctl reload nginx.service; systemctl restart coturn.service";
+      postRun =
+        "systemctl reload nginx.service; systemctl restart coturn.service";
       group = "turnserver";
     };
     services.nginx.enable = true;
@@ -82,12 +76,10 @@ in
     users.groups."turnserver".members = [ config.services.nginx.user ];
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${config.networking.domain}.records = [
-      {
-        name = "turn";
-        type = "CNAME";
-        data = "vps";
-      }
-    ];
+    eilean.services.dns.zones.${config.networking.domain}.records = [{
+      name = "turn";
+      type = "CNAME";
+      data = "vps";
+    }];
   };
 }

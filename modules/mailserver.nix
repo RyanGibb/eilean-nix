@@ -42,10 +42,14 @@ in {
     '';
 
     services.postfix.config = {
-      smtpd_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtp_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtpd_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtp_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtpd_tls_protocols =
+        mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtp_tls_protocols =
+        mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtpd_tls_mandatory_protocols =
+        mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtp_tls_mandatory_protocols =
+        mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
     };
 
     eilean.dns.enable = true;
@@ -68,19 +72,20 @@ in {
       {
         name = "@";
         type = "TXT";
-        data = "\"v=spf1 a:mail.${config.networking.domain} -all\"";
+        data = ''"v=spf1 a:mail.${config.networking.domain} -all"'';
       }
       {
         name = "mail._domainkey";
         ttl = 10800;
         type = "TXT";
-        data = "\"v=DKIM1; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6YmYYvoFF7VqtGcozpVQa78aaGgZdvc5ZIHqzmkKdCBEyDF2FRbCEK4s2AlC8hhc8O4mSSe3S4AzEhlRgHXbU22GBaUZ3s2WHS8JJwZvWeTjsbXQwjN/U7xpkqXPHLH9IVfOJbHlp4HQmCAXw4NaypgkkxIGK0jaZHm2j6/1izQIDAQAB\"";
+        data = ''
+          "v=DKIM1; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6YmYYvoFF7VqtGcozpVQa78aaGgZdvc5ZIHqzmkKdCBEyDF2FRbCEK4s2AlC8hhc8O4mSSe3S4AzEhlRgHXbU22GBaUZ3s2WHS8JJwZvWeTjsbXQwjN/U7xpkqXPHLH9IVfOJbHlp4HQmCAXw4NaypgkkxIGK0jaZHm2j6/1izQIDAQAB"'';
       }
       {
         name = "_dmarc";
         ttl = 10800;
         type = "TXT";
-        data = "\"v=DMARC1; p=reject\"";
+        data = ''"v=DMARC1; p=reject"'';
       }
     ];
   };
