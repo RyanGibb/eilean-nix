@@ -1,10 +1,8 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     eilean.url = "github:RyanGibb/eilean-nix/main";
-    # replace the below line to manage the Nixpkgs instance yourself
-    nixpkgs.follows = "eilean/nixpkgs";
-    #eilean.inputs.nixpkgs.follows = "nixpkgs";
+    eilean.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, eilean, ... }@inputs:
