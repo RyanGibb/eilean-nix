@@ -51,12 +51,12 @@ let
     };
   };
 in {
-  imports = [ ./bind.nix ];
+  imports = [ ./bind.nix ./eon.nix ];
 
   options.eilean.services.dns = {
     enable = mkEnableOption "DNS server";
     server = mkOption {
-      type = types.enum [ "bind" ];
+      type = types.enum [ "bind" "eon" ];
       default = "bind";
     };
     openFirewall = mkOption {

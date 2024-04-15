@@ -2,9 +2,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     nixos-mailserver.url = "github:RyanGibb/nixos-mailserver/fork-23.11";
+    eon.url = "github:RyanGibb/eon";
+    eon.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixos-mailserver, ... }: rec {
+  outputs = { self, nixpkgs, nixos-mailserver, eon, ... }: rec {
     packages = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (system:
       let pkgs = nixpkgs.legacyPackages.${system};
       in { manpage = import ./man { inherit pkgs system nixos-mailserver; }; });
@@ -13,6 +15,7 @@
       imports = [
         ./modules/default.nix
         nixos-mailserver.nixosModule
+        eon.nixosModules.default
         ({ pkgs, config, ... }: {
           nixpkgs.overlays = [
             (final: prev: {
