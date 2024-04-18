@@ -16,6 +16,7 @@ with lib;
     ./turn.nix
     ./headscale.nix
     ./wireguard/default.nix
+    ./radicale.nix
   ];
 
   options.eilean = with types; {
