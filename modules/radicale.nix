@@ -82,7 +82,7 @@ in {
     eilean.services.dns.zones.${domain}.records = [{
       name = "cal";
       type = "CNAME";
-      data = "vps";
+      data = cfg.domainName;
     }];
   };
 }

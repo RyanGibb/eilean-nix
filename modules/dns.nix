@@ -50,12 +50,12 @@ in {
         }
 
         {
-          name = "vps";
+          name = cfg.domainName;
           type = "A";
           data = cfg.serverIpv4;
         }
         {
-          name = "vps";
+          name = cfg.domainName;
           type = "AAAA";
           data = cfg.serverIpv6;
         }

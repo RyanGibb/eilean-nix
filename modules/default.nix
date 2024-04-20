@@ -24,6 +24,10 @@ with lib;
     serverIpv4 = mkOption { type = str; };
     serverIpv6 = mkOption { type = str; };
     publicInterface = mkOption { type = str; };
+    domainName = mkOption {
+      type = types.str;
+      default = "vps";
+    };
   };
 
   config = {

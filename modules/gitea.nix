@@ -97,7 +97,7 @@ in {
     eilean.services.dns.zones.${config.networking.domain}.records = [{
       name = "git";
       type = "CNAME";
-      data = "vps";
+      data = cfg.domainName;
     }];
 
     # proxy port 22 on ethernet interface to internal gitea ssh server

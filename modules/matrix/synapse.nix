@@ -241,7 +241,7 @@ in {
     eilean.services.dns.zones.${config.networking.domain}.records = [{
       name = "matrix";
       type = "CNAME";
-      data = "vps";
+      data = cfg.domainName;
     }];
   };
 }
