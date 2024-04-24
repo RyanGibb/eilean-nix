@@ -28,11 +28,6 @@ in {
           data = cfg.serverIpv4;
         }
         {
-          name = "@";
-          type = "NS";
-          data = ns;
-        }
-        {
           name = ns;
           type = "AAAA";
           data = cfg.serverIpv6;
