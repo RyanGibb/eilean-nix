@@ -13,9 +13,7 @@ let
         readOnly = true;
         default = name;
       };
-      passwordFile = mkOption {
-        type = types.nullOr types.str;
-      };
+      passwordFile = mkOption { type = types.nullOr types.str; };
     };
   };
 in {
@@ -31,23 +29,19 @@ in {
     services.radicale = {
       enable = true;
       settings = {
-        server = {
-          hosts = [ "0.0.0.0:5232" ];
-        };
+        server = { hosts = [ "0.0.0.0:5232" ]; };
         auth = {
           type = "htpasswd";
           htpasswd_filename = passwdFile;
           htpasswd_encryption = "bcrypt";
         };
-        storage = {
-          filesystem_folder = "/var/lib/radicale/collections";
-        };
+        storage = { filesystem_folder = "/var/lib/radicale/collections"; };
       };
     };
 
     systemd.services.radicale = {
       serviceConfig.ReadWritePaths = [ "/var/lib/radicale" ];
-      preStart =''
+      preStart = ''
         if (! test -d "${passwdDir}"); then
           mkdir "${passwdDir}"
           chmod 755 "${passwdDir}"
@@ -58,8 +52,9 @@ in {
         cat <<EOF > ${passwdFile}
 
         ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value:
-          "$(${pkgs.apacheHttpd}/bin/htpasswd -nbB \"${name}\" \"$(head -n 2 ${value.passwordFile})\")"
-        ) cfg.radicale.users)}
+          ''
+            $(${pkgs.apacheHttpd}/bin/htpasswd -nbB "${name}" "$(head -n 2 ${value.passwordFile})")'')
+          cfg.radicale.users)}
         EOF
       '';
     };
@@ -71,9 +66,7 @@ in {
         "cal.${domain}" = {
           forceSSL = true;
           enableACME = true;
-          locations."/" = {
-            proxyPass = "http://localhost:5232";
-          };
+          locations."/" = { proxyPass = "http://localhost:5232"; };
         };
       };
     };
