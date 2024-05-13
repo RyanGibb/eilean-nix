@@ -17,6 +17,10 @@ in lib.mkIf (cfg.enable && cfg.server == "bind") {
     in builtins.mapAttrs mapZones cfg.zones;
   };
 
+  users.users = {
+    named.extraGroups = [ config.services.opendkim.group ];
+  };
+
   ### bind prestart copy zonefiles
   systemd.services.bind.preStart = let
     ops = let
@@ -29,6 +33,7 @@ in lib.mkIf (cfg.enable && cfg.server == "bind") {
         in ''
           if ! diff ${zonefile} ${path} > /dev/null; then
             cp ${zonefile} ${path}
+            cat ${config.mailserver.dkimKeyDirectory}/*.txt >> ${path}
             # remove journal file to avoid 'journal out of sync with zone'
             # NB this will reset dynamic updates
             rm -f ${path}.signed.jnl

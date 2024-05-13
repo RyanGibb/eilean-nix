@@ -75,13 +75,6 @@ in {
         data = ''"v=spf1 a:mail.${config.networking.domain} -all"'';
       }
       {
-        name = "mail._domainkey";
-        ttl = 10800;
-        type = "TXT";
-        data = ''
-          "v=DKIM1; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6YmYYvoFF7VqtGcozpVQa78aaGgZdvc5ZIHqzmkKdCBEyDF2FRbCEK4s2AlC8hhc8O4mSSe3S4AzEhlRgHXbU22GBaUZ3s2WHS8JJwZvWeTjsbXQwjN/U7xpkqXPHLH9IVfOJbHlp4HQmCAXw4NaypgkkxIGK0jaZHm2j6/1izQIDAQAB"'';
-      }
-      {
         name = "_dmarc";
         ttl = 10800;
         type = "TXT";
