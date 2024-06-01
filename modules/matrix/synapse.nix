@@ -138,8 +138,6 @@ in {
           max_upload_size = "100M";
           app_service_config_files = (optional cfg.matrix.bridges.whatsapp
             "/var/lib/mautrix-whatsapp/whatsapp-registration.yaml")
-            ++ (optional cfg.matrix.bridges.signal
-              "/var/lib/mautrix-signal/signal-registration.yaml")
             ++ (optional cfg.matrix.bridges.instagram
               "/var/lib/mautrix-instagram/instagram-registration.yaml")
             ++ (optional cfg.matrix.bridges.messenger
@@ -178,10 +176,9 @@ in {
       [ "matrix-synapse-turn-shared-secret-generator.service" ];
 
     systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups =
+      # remove after https://github.com/NixOS/nixpkgs/pull/311681/files
       (optional cfg.matrix.bridges.whatsapp
         config.systemd.services.mautrix-whatsapp.serviceConfig.Group)
-      ++ (optional cfg.matrix.bridges.signal
-        config.systemd.services.mautrix-signal.serviceConfig.Group)
       ++ (optional cfg.matrix.bridges.instagram
         config.systemd.services.mautrix-instagram.serviceConfig.Group)
       ++ (optional cfg.matrix.bridges.messenger
@@ -199,6 +196,7 @@ in {
       settings.bridge.permissions."@${config.eilean.username}:${config.networking.domain}" =
         "admin";
     };
+    # using https://github.com/NixOS/nixpkgs/pull/277368
     services.mautrix-signal = mkIf cfg.matrix.bridges.signal {
       enable = true;
       settings.homeserver.address =
@@ -210,6 +208,7 @@ in {
       settings.bridge.permissions."@${config.eilean.username}:${config.networking.domain}" =
         "admin";
     };
+    # TODO replace with upstreamed mautrix-meta
     services.mautrix-instagram = mkIf cfg.matrix.bridges.instagram {
       enable = true;
       settings.homeserver.address =

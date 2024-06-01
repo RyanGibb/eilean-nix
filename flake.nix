@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     nixos-mailserver.url = "github:RyanGibb/nixos-mailserver/fork-23.11";
     eon.url = "github:RyanGibb/eon";
     eon.inputs.nixpkgs.follows = "nixpkgs";

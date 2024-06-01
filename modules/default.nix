@@ -10,7 +10,6 @@ with lib;
     ./gitea.nix
     ./dns.nix
     ./matrix/synapse.nix
-    ./matrix/mautrix-signal.nix
     ./matrix/mautrix-instagram.nix
     ./matrix/mautrix-messenger.nix
     ./turn.nix
