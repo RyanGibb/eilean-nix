@@ -17,9 +17,7 @@ in lib.mkIf (cfg.enable && cfg.server == "bind") {
     in builtins.mapAttrs mapZones cfg.zones;
   };
 
-  users.users = {
-    named.extraGroups = [ config.services.opendkim.group ];
-  };
+  users.users = { named.extraGroups = [ config.services.opendkim.group ]; };
 
   ### bind prestart copy zonefiles
   systemd.services.bind.preStart = let

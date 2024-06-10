@@ -4,6 +4,8 @@ with lib;
 let
   cfg = config.eilean;
   turnSharedSecretFile = "/run/matrix-synapse/turn-shared-secret";
+  domain = config.networking.domain;
+  subdomain = "matrix.${domain}";
 in {
   options.eilean.matrix = {
     enable = mkEnableOption "matrix";
@@ -61,25 +63,23 @@ in {
 
       virtualHosts = {
         # This host section can be placed on a different host than the rest,
-        # i.e. to delegate from the host being accessible as ${config.networking.domain}
+        # i.e. to delegate from the host being accessible as ${domain}
         # to another host actually running the Matrix homeserver.
-        "${config.networking.domain}" = {
+        "${domain}" = {
           enableACME = true;
           forceSSL = true;
 
           locations."= /.well-known/matrix/server".extraConfig = let
             # use 443 instead of the default 8448 port to unite
             # the client-server and server-server port for simplicity
-            server = { "m.server" = "matrix.${config.networking.domain}:443"; };
+            server = { "m.server" = "${subdomain}:443"; };
           in ''
             default_type application/json;
             return 200 '${builtins.toJSON server}';
           '';
           locations."= /.well-known/matrix/client".extraConfig = let
             client = {
-              "m.homeserver" = {
-                "base_url" = "https://matrix.${config.networking.domain}";
-              };
+              "m.homeserver" = { "base_url" = "https://${subdomain}"; };
               "m.identity_server" = { "base_url" = "https://vector.im"; };
             };
             # ACAO required to allow element-web on any URL to request this json file
@@ -97,7 +97,7 @@ in {
         };
 
         # Reverse proxy for Matrix client-server and server-server communication
-        "matrix.${config.networking.domain}" = {
+        "${subdomain}" = {
           enableACME = true;
           forceSSL = true;
 
@@ -120,7 +120,7 @@ in {
       enable = true;
       settings = mkMerge [
         {
-          server_name = config.networking.domain;
+          server_name = domain;
           enable_registration = true;
           registration_requires_token = true;
           registration_shared_secret_path = cfg.matrix.registrationSecretFile;
@@ -186,58 +186,54 @@ in {
 
     services.mautrix-whatsapp = mkIf cfg.matrix.bridges.whatsapp {
       enable = true;
-      settings.homeserver.address =
-        "https://matrix.${config.networking.domain}";
-      settings.homeserver.domain = config.networking.domain;
+      settings.homeserver.address = "https://${subdomain}";
+      settings.homeserver.domain = domain;
       settings.appservice.hostname = "localhost";
       settings.appservice.address = "http://localhost:29318";
       settings.bridge.personal_filtering_spaces = true;
       settings.bridge.history_sync.backfill = false;
-      settings.bridge.permissions."@${config.eilean.username}:${config.networking.domain}" =
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
     };
     # using https://github.com/NixOS/nixpkgs/pull/277368
     services.mautrix-signal = mkIf cfg.matrix.bridges.signal {
       enable = true;
-      settings.homeserver.address =
-        "https://matrix.${config.networking.domain}";
-      settings.homeserver.domain = config.networking.domain;
+      settings.homeserver.address = "https://${subdomain}";
+      settings.homeserver.domain = domain;
       settings.appservice.hostname = "localhost";
       settings.appservice.address = "http://localhost:29328";
       settings.bridge.personal_filtering_spaces = true;
-      settings.bridge.permissions."@${config.eilean.username}:${config.networking.domain}" =
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
     };
     # TODO replace with upstreamed mautrix-meta
     services.mautrix-instagram = mkIf cfg.matrix.bridges.instagram {
       enable = true;
-      settings.homeserver.address =
-        "https://matrix.${config.networking.domain}";
-      settings.homeserver.domain = config.networking.domain;
+      settings.homeserver.address = "https://${subdomain}";
+      settings.homeserver.domain = domain;
       settings.appservice.hostname = "localhost";
       settings.appservice.address = "http://localhost:29319";
       settings.bridge.personal_filtering_spaces = true;
       settings.bridge.backfill.enabled = false;
-      settings.bridge.permissions."@${config.eilean.username}:${config.networking.domain}" =
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
     };
     services.mautrix-messenger = mkIf cfg.matrix.bridges.messenger {
       enable = true;
-      settings.homeserver.address =
-        "https://matrix.${config.networking.domain}";
-      settings.homeserver.domain = config.networking.domain;
+      settings.homeserver.address = "https://${subdomain}";
+      settings.homeserver.domain = domain;
       settings.appservice.hostname = "localhost";
       settings.appservice.address = "http://localhost:29320";
       settings.bridge.personal_filtering_spaces = true;
       settings.bridge.backfill.enabled = false;
-      settings.bridge.permissions."@${config.eilean.username}:${config.networking.domain}" =
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
     };
 
     eilean.turn.enable = mkIf cfg.matrix.turn true;
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${config.networking.domain}.records = [{
+    eilean.services.dns.zones.${domain}.records = [{
       name = "matrix";
       type = "CNAME";
       data = cfg.domainName;

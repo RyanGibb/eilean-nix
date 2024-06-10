@@ -4,23 +4,26 @@ with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
+  subdomain = "turn.${domain}";
   staticAuthSecretFile = "/run/coturn/static-auth-secret";
 in {
   options.eilean.turn = { enable = mkEnableOption "TURN server"; };
 
   config = mkIf cfg.turn.enable {
-    services.coturn = rec {
-      enable = true;
-      no-cli = true;
-      no-tcp-relay = true;
-      secure-stun = true;
-      use-auth-secret = true;
-      static-auth-secret-file = staticAuthSecretFile;
-      realm = "turn.${domain}";
-      relay-ips = with config.eilean; [ serverIpv4 serverIpv6 ];
-      cert = "${config.security.acme.certs.${realm}.directory}/full.pem";
-      pkey = "${config.security.acme.certs.${realm}.directory}/key.pem";
-    };
+    services.coturn =
+      let certDir = config.security.acme.certs.${subdomain}.directory;
+      in {
+        enable = true;
+        no-cli = true;
+        no-tcp-relay = true;
+        secure-stun = true;
+        use-auth-secret = true;
+        static-auth-secret-file = staticAuthSecretFile;
+        realm = subdomain;
+        relay-ips = with config.eilean; [ serverIpv4 serverIpv6 ];
+        cert = "${certDir}/fullchain.pem";
+        pkey = "${certDir}/key.pem";
+      };
 
     systemd.services = {
       coturn-static-auth-secret-generator = {

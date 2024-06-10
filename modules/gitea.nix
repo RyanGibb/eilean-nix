@@ -4,6 +4,7 @@ with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
+  subdomain = "git.${domain}";
 in {
   options.eilean.gitea = {
     enable = mkEnableOption "gitea";
@@ -21,7 +22,7 @@ in {
     services.nginx = {
       enable = true;
       recommendedProxySettings = true;
-      virtualHosts."git.${domain}" = {
+      virtualHosts."${subdomain}" = {
         enableACME = true;
         forceSSL = true;
         locations."/" = {
@@ -47,8 +48,8 @@ in {
       mailerPasswordFile = cfg.mailserver.systemAccountPasswordFile;
       settings = {
         server = {
-          ROOT_URL = "https://git.${domain}/";
-          DOMAIN = "git.${domain}";
+          ROOT_URL = "https://${subdomain}/";
+          DOMAIN = subdomain;
         };
         mailer = {
           ENABLED = true;

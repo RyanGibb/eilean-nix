@@ -4,6 +4,7 @@ with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
+  subdomain = "mail.${domain}";
 in {
   options.eilean.mailserver = {
     enable = mkEnableOption "mailserver";
@@ -16,7 +17,7 @@ in {
   config = mkIf cfg.mailserver.enable {
     mailserver = {
       enable = true;
-      fqdn = "mail.${domain}";
+      fqdn = subdomain;
       domains = [ "${domain}" ];
 
       loginAccounts = {

@@ -4,6 +4,7 @@ with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
+  subdomain = "mastodon.${domain}";
 in {
   options.eilean.mastodon = { enable = mkEnableOption "mastodon"; };
 
@@ -26,8 +27,8 @@ in {
       };
       extraConfig = {
         # override localDomain
-        LOCAL_DOMAIN = "${domain}";
-        WEB_DOMAIN = "mastodon.${domain}";
+        LOCAL_DOMAIN = domain;
+        WEB_DOMAIN = subdomain;
 
         # https://peterbabic.dev/blog/setting-up-smtp-in-mastodon/
         SMTP_SSL = "true";
@@ -46,13 +47,13 @@ in {
         # relies on root domain being set up
         "${domain}".locations = {
           "/.well-known/host-meta".extraConfig = ''
-            return 301 https://mastodon.${domain}$request_uri;
+            return 301 https://${subdomain}$request_uri;
           '';
           "/.well-known/webfinger".extraConfig = ''
-            return 301 https://mastodon.${domain}$request_uri;
+            return 301 https://${subdomain}$request_uri;
           '';
         };
-        "mastodon.${domain}" = {
+        "${subdomain}" = {
           root = "${config.services.mastodon.package}/public/";
           forceSSL = true;
           enableACME = true;
