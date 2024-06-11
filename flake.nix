@@ -16,6 +16,7 @@
         ./modules/default.nix
         nixos-mailserver.nixosModule
         eon.nixosModules.default
+        eon.nixosModules.acme
         ({ pkgs, config, ... }: {
           nixpkgs.overlays = [
             (final: prev: {

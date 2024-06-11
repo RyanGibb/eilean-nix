@@ -43,7 +43,8 @@
 
   # TODO replace this with domain
   networking.domain = "example.org";
-  security.acme.acceptTerms = true;
+  security.acme.acceptTerms = lib.mkIf (!config.eilean.acme-eon) true;
+  security.acme-eon.acceptTerms = lib.mkIf config.eilean.acme-eon true;
 
   # TODO select internationalisation properties
   i18n.defaultLocale = "en_GB.UTF-8";

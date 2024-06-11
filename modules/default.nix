@@ -4,6 +4,7 @@ with lib;
 
 {
   imports = [
+    ./acme-eon.nix
     ./services/dns/default.nix
     ./mastodon.nix
     ./mailserver.nix
@@ -32,7 +33,9 @@ with lib;
   config = {
     # TODO install manpage
     environment.systemPackages = [ ];
-    security.acme.defaults.email =
+    security.acme.defaults.email = lib.mkIf (!config.eilean.acme-eon)
+      "${config.eilean.username}@${config.networking.domain}";
+    security.acme-eon.defaults.email = lib.mkIf config.eilean.acme-eon
       "${config.eilean.username}@${config.networking.domain}";
     networking.firewall.allowedTCPPorts = mkIf config.services.nginx.enable [
       80 # HTTP

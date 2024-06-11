@@ -40,6 +40,8 @@ in {
     users.groups.${config.services.mastodon.group}.members =
       [ config.services.nginx.user ];
 
+    security.acme-eon.nginxCerts = lib.mkIf cfg.acme-eon [ subdomain ];
+
     services.nginx = {
       enable = true;
       recommendedProxySettings = true;
@@ -56,7 +58,7 @@ in {
         "${subdomain}" = {
           root = "${config.services.mastodon.package}/public/";
           forceSSL = true;
-          enableACME = true;
+          enableACME = lib.mkIf (!cfg.acme-eon) true;
 
           locations."/system/".alias = "/var/lib/mastodon/public-system/";
 

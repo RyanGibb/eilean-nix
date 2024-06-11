@@ -52,6 +52,8 @@ in {
         LC_CTYPE = "C";
     '';
 
+    security.acme-eon.nginxCerts = lib.mkIf cfg.acme-eon [ domain subdomain ];
+
     services.nginx = {
       enable = true;
       # only recommendedProxySettings and recommendedGzipSettings are strictly required,
@@ -66,7 +68,7 @@ in {
         # i.e. to delegate from the host being accessible as ${domain}
         # to another host actually running the Matrix homeserver.
         "${domain}" = {
-          enableACME = true;
+          enableACME = lib.mkIf (!cfg.acme-eon) true;
           forceSSL = true;
 
           locations."= /.well-known/matrix/server".extraConfig = let
@@ -98,7 +100,7 @@ in {
 
         # Reverse proxy for Matrix client-server and server-server communication
         "${subdomain}" = {
-          enableACME = true;
+          enableACME = lib.mkIf (!cfg.acme-eon) true;
           forceSSL = true;
 
           # Or do a redirect instead of the 404, or whatever is appropriate for you.

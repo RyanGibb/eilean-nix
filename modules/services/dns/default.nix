@@ -57,7 +57,7 @@ in {
     enable = mkEnableOption "DNS server";
     server = mkOption {
       type = types.enum [ "bind" "eon" ];
-      default = "bind";
+      default = if config.eilean.acme-eon then "eon" else "bind";
     };
     openFirewall = mkOption {
       type = types.bool;
