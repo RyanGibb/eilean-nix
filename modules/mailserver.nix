@@ -15,6 +15,11 @@ in {
   };
 
   config = mkIf cfg.mailserver.enable {
+    security.acme-eon.certs."${subdomain}" = lib.mkIf cfg.acme-eon {
+      group = "turnserver";
+      reloadServices = [ "postfix.service" "dovecot.service" ];
+    };
+
     mailserver = {
       enable = true;
       fqdn = subdomain;
@@ -32,8 +37,12 @@ in {
 
       # Use Let's Encrypt certificates. Note that this needs to set up a stripped
       # down nginx and opens port 80.
-      certificateScheme = "acme-nginx";
-
+      certificateScheme = if cfg.acme-eon then "manual" else "acme-nginx";
+      certificateFile = lib.mkIf cfg.acme-eon "${
+          config.security.acme-eon.certs.${subdomain}.directory
+        }/fullchain.pem";
+      keyFile = lib.mkIf cfg.acme-eon
+        "${config.security.acme-eon.certs.${subdomain}.directory}/key.pem";
       localDnsResolver = false;
     };
 
@@ -41,6 +50,16 @@ in {
     services.nginx.virtualHosts."${config.mailserver.fqdn}".extraConfig = ''
       return 301 $scheme://${domain}$request_uri;
     '';
+
+    systemd.services.dovecot2 = lib.mkIf cfg.acme-eon {
+      wants = [ "acme-eon-${subdomain}.service" ];
+      after = [ "acme-eon-${subdomain}.service" ];
+    };
+
+    systemd.services.postfix = lib.mkIf cfg.acme-eon {
+      wants = [ "acme-eon-${subdomain}.service" ];
+      after = [ "acme-eon-${subdomain}.service" ];
+    };
 
     services.postfix.config = {
       smtpd_tls_protocols =

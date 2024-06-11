@@ -19,11 +19,13 @@ in {
   };
 
   config = mkIf cfg.gitea.enable {
+    security.acme-eon.nginxCerts = [ subdomain ];
+
     services.nginx = {
       enable = true;
       recommendedProxySettings = true;
       virtualHosts."${subdomain}" = {
-        enableACME = true;
+        enableACME = lib.mkIf (!cfg.acme-eon) true;
         forceSSL = true;
         locations."/" = {
           proxyPass = "http://localhost:${
