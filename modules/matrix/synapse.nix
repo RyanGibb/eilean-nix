@@ -238,7 +238,7 @@ in {
     eilean.services.dns.zones.${domain}.records = [{
       name = "matrix";
       type = "CNAME";
-      data = cfg.domainName;
+      value = cfg.domainName;
     }];
   };
 }

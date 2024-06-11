@@ -77,28 +77,28 @@ in {
       {
         name = "mail";
         type = "A";
-        data = cfg.serverIpv4;
+        value = cfg.serverIpv4;
       }
       {
         name = "mail";
         type = "AAAA";
-        data = cfg.serverIpv6;
+        value = cfg.serverIpv6;
       }
       {
         name = "@";
         type = "MX";
-        data = "10 mail";
+        value = "10 mail";
       }
       {
         name = "@";
         type = "TXT";
-        data = ''"v=spf1 a:mail.${config.networking.domain} -all"'';
+        value = ''"v=spf1 a:mail.${config.networking.domain} -all"'';
       }
       {
         name = "_dmarc";
         ttl = 10800;
         type = "TXT";
-        data = ''"v=DMARC1; p=reject"'';
+        value = ''"v=DMARC1; p=reject"'';
       }
     ];
   };

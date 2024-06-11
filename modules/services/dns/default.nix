@@ -43,7 +43,7 @@ let
           default = null;
         };
         type = mkOption { type = types.str; };
-        data = mkOption { type = types.str; };
+        value = mkOption { type = types.str; };
       };
     in mkOption {
       type = with types; listOf (submodule recordOpts);

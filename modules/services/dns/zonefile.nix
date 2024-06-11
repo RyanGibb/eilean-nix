@@ -14,7 +14,7 @@ pkgs.writeTextFile {
       ${builtins.toString zone.soa.negativeCacheTtl}
     )
     ${lib.strings.concatStringsSep "\n" (builtins.map
-      (rr: "${rr.name} IN ${builtins.toString rr.ttl} ${rr.type} ${rr.data}")
+      (rr: "${rr.name} IN ${builtins.toString rr.ttl} ${rr.type} ${rr.value}")
       zone.records)}
   '';
 }

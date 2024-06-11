@@ -94,7 +94,7 @@ in {
     eilean.services.dns.zones.${config.networking.domain}.records = [{
       name = "turn";
       type = "CNAME";
-      data = cfg.domainName;
+      value = cfg.domainName;
     }];
   };
 }

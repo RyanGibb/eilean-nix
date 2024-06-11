@@ -20,45 +20,45 @@ in {
         {
           name = "@";
           type = "NS";
-          data = ns;
+          value = ns;
         }
         {
           name = ns;
           type = "A";
-          data = cfg.serverIpv4;
+          value = cfg.serverIpv4;
         }
         {
           name = ns;
           type = "AAAA";
-          data = cfg.serverIpv6;
+          value = cfg.serverIpv6;
         }
       ]) cfg.dns.nameservers ++ [
         {
           name = "@";
           type = "A";
-          data = cfg.serverIpv4;
+          value = cfg.serverIpv4;
         }
         {
           name = "@";
           type = "AAAA";
-          data = cfg.serverIpv6;
+          value = cfg.serverIpv6;
         }
 
         {
           name = cfg.domainName;
           type = "A";
-          data = cfg.serverIpv4;
+          value = cfg.serverIpv4;
         }
         {
           name = cfg.domainName;
           type = "AAAA";
-          data = cfg.serverIpv6;
+          value = cfg.serverIpv6;
         }
 
         {
           name = "@";
           type = "LOC";
-          data = "52 12 40.4 N 0 5 31.9 E 22m 10m 10m 10m";
+          value = "52 12 40.4 N 0 5 31.9 E 22m 10m 10m 10m";
         }
       ];
     };

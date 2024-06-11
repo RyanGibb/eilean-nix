@@ -57,7 +57,7 @@ in {
     eilean.services.dns.zones.${cfg.headscale.zone}.records = [{
       name = "${cfg.headscale.domain}.";
       type = "CNAME";
-      data = cfg.domainName;
+      value = cfg.domainName;
     }];
   };
 }
