@@ -56,6 +56,8 @@ in {
       after = [ "acme-eon-${subdomain}.service" ];
     };
 
+    services.dovecot2.sieve.extensions = [ "fileinto" ];
+
     systemd.services.postfix = lib.mkIf cfg.acme-eon {
       wants = [ "acme-eon-${subdomain}.service" ];
       after = [ "acme-eon-${subdomain}.service" ];
