@@ -39,6 +39,13 @@ in {
         description = "Enable Facebook Messenger bridge.";
       };
     };
+    slidingSync = {
+      enable = mkEnableOption "sliding-sync";
+      secretFile = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+      };
+    };
   };
 
   config = mkIf cfg.matrix.enable {
@@ -83,6 +90,10 @@ in {
             client = {
               "m.homeserver" = { "base_url" = "https://${subdomain}"; };
               "m.identity_server" = { "base_url" = "https://vector.im"; };
+              "org.matrix.msc3575.proxy" = if cfg.matrix.slidingSync.enable then {
+                "url" = "https://${subdomain}";
+              } else
+                { };
             };
             # ACAO required to allow element-web on any URL to request this json file
             # set other headers due to https://github.com/yandex/gixy/blob/master/docs/en/plugins/addheaderredefinition.md
@@ -110,10 +121,15 @@ in {
           '';
 
           # forward all Matrix API calls to the synapse Matrix homeserver
-          locations."/_matrix" = {
-            proxyPass = "http://127.0.0.1:8008"; # without a trailing /
-            #proxyPassReverse = "http://127.0.0.1:8008"; # without a trailing /
+          locations."~ ^(\\/_matrix|\\/_synapse\\/client)" = {
+            proxyPass = "http://127.0.0.1:8008";
           };
+          # forward all sliding sync API calls to the sliding sync server
+          locations."~ ^/(client/|_matrix/client/unstable/org.matrix.msc3575/sync)" =
+            mkIf cfg.matrix.slidingSync.enable {
+              priority = 100;
+              proxyPass = "http://127.0.0.1:8009";
+            };
         };
       };
     };
@@ -240,5 +256,11 @@ in {
       type = "CNAME";
       value = cfg.domainName;
     }];
+
+    services.matrix-sliding-sync = mkIf cfg.matrix.slidingSync.enable {
+      enable = true;
+      environmentFile = cfg.matrix.slidingSync.secretFile;
+      settings = { SYNCV3_SERVER = "https://${subdomain}"; };
+    };
   };
 }
