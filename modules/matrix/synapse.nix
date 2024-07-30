@@ -212,6 +212,8 @@ in {
       settings.bridge.history_sync.backfill = false;
       settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
+      settings.bridge.encryption.allow = true;
+      settings.bridge.encryption.default = true;
     };
     # using https://github.com/NixOS/nixpkgs/pull/277368
     services.mautrix-signal = mkIf cfg.matrix.bridges.signal {
@@ -223,6 +225,8 @@ in {
       settings.bridge.personal_filtering_spaces = true;
       settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
+      settings.bridge.encryption.allow = true;
+      settings.bridge.encryption.default = true;
     };
     # TODO replace with upstreamed mautrix-meta
     services.mautrix-instagram = mkIf cfg.matrix.bridges.instagram {
@@ -235,6 +239,8 @@ in {
       settings.bridge.backfill.enabled = false;
       settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
+      settings.bridge.encryption.allow = true;
+      settings.bridge.encryption.default = true;
     };
     services.mautrix-messenger = mkIf cfg.matrix.bridges.messenger {
       enable = true;
@@ -246,6 +252,8 @@ in {
       settings.bridge.backfill.enabled = false;
       settings.bridge.permissions."@${config.eilean.username}:${domain}" =
         "admin";
+      settings.bridge.encryption.allow = true;
+      settings.bridge.encryption.default = true;
     };
 
     eilean.turn.enable = mkIf cfg.matrix.turn true;
