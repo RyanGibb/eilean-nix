@@ -20,7 +20,7 @@ in {
   options.eilean.radicale = {
     enable = mkEnableOption "radicale";
     users = mkOption {
-      type = with types; attrsOf (submodule userOps);
+      type = with types; nullOr (attrsOf (submodule userOps));
       default = { };
     };
   };
@@ -41,7 +41,7 @@ in {
 
     systemd.services.radicale = {
       serviceConfig.ReadWritePaths = [ "/var/lib/radicale" ];
-      preStart = ''
+      preStart = lib.mkIf (cfg.radicale.users != null)''
         if (! test -d "${passwdDir}"); then
           mkdir "${passwdDir}"
           chmod 755 "${passwdDir}"
