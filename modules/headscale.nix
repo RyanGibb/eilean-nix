@@ -30,11 +30,6 @@ in {
         server_url = "https://${cfg.headscale.domain}";
         logtail.enabled = false;
         ip_prefixes = [ "100.64.0.0/10" "fd7a:115c:a1e0::/48" ];
-        dns_config = {
-          # magicDns = true;
-          nameservers = config.networking.nameservers;
-          base_domain = "${cfg.headscale.zone}";
-        };
       };
     };
 
