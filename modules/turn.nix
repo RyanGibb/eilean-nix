@@ -39,8 +39,10 @@ in {
         script = ''
           if [ ! -f '${staticAuthSecretFile}' ]; then
             umask 077
+            DIR="$(dirname '${staticAuthSecretFile}')"
+            mkdir -p "$DIR"
             tr -dc A-Za-z0-9 </dev/urandom | head -c 32 > '${staticAuthSecretFile}'
-            chown ${config.systemd.services.coturn.serviceConfig.User}:${config.systemd.services.coturn.serviceConfig.Group} '${staticAuthSecretFile}'
+            chown -R ${config.systemd.services.coturn.serviceConfig.User}:${config.systemd.services.coturn.serviceConfig.Group} "$DIR"
           fi
         '';
         serviceConfig.Type = "oneshot";
