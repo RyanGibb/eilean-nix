@@ -10,6 +10,7 @@ with lib;
     ./mailserver.nix
     ./gitea.nix
     ./dns.nix
+    ./fail2ban.nix
     ./matrix/synapse.nix
     ./matrix/mautrix-instagram.nix
     ./matrix/mautrix-messenger.nix
