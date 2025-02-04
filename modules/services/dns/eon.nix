@@ -27,7 +27,7 @@ in lib.mkIf (cfg.enable && cfg.server == "eon") {
         local record_type=$(echo "$input" | ${pkgs.gawk}/bin/awk '{print $3}')
         local ttl=3600
         local record_value=$(echo "$input" | ${pkgs.gnused}/bin/sed -E 's/[^"]*"([^"]*)"[^"]*/\1/g')
-        ${config.services.eon.package}/bin/capc update /var/lib/eon/caps/domain/''${domain}.cap -u add:''${record_name}.''${domain}:''${record_type}:"''${record_value}":''${ttl} || exit 0
+        ${config.services.eon.package}/bin/capc update /var/lib/eon/caps/domain/''${domain}.cap -u "add|''${record_name}.''${domain}|''${record_type}|''${record_value}|''${ttl}" || exit 0
       }
       shopt -s nullglob
     '';
