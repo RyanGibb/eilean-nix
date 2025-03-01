@@ -137,9 +137,8 @@ in {
             }];
           }];
           max_upload_size = "100M";
-          app_service_config_files =
-            (optional cfg.matrix.bridges.instagram
-              "/var/lib/mautrix-instagram/instagram-registration.yaml")
+          app_service_config_files = (optional cfg.matrix.bridges.instagram
+            "/var/lib/mautrix-instagram/instagram-registration.yaml")
             ++ (optional cfg.matrix.bridges.messenger
               "/var/lib/mautrix-messenger/messenger-registration.yaml");
         }

@@ -41,7 +41,7 @@ in {
 
     systemd.services.radicale = {
       serviceConfig.ReadWritePaths = [ "/var/lib/radicale" ];
-      preStart = lib.mkIf (cfg.radicale.users != null)''
+      preStart = lib.mkIf (cfg.radicale.users != null) ''
         if (! test -d "${passwdDir}"); then
           mkdir "${passwdDir}"
           chmod 755 "${passwdDir}"
