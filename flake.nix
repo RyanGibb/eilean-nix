@@ -11,7 +11,10 @@
   outputs = { nixpkgs, nixos-mailserver, eon, ... }: {
     packages = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (system:
       let pkgs = nixpkgs.legacyPackages.${system};
-      in { manpage = import ./man { inherit pkgs system nixos-mailserver; }; });
+      in {
+        manpage = import ./man { inherit pkgs system nixos-mailserver; };
+        packages.mautrix-meta = (pkgs.callPackage ./pkgs/mautrix-meta.nix { });
+      });
 
     nixosModules.default = {
       imports = [

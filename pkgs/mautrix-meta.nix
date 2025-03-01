@@ -1,18 +1,20 @@
 { lib, buildGoModule, fetchFromGitHub, olm }:
 
-buildGoModule rec {
+let version = "0.4.4";
+in buildGoModule rec {
   name = "mautrix-meta";
+  inherit version;
 
   src = fetchFromGitHub {
     owner = "mautrix";
     repo = "meta";
-    rev = "7941e937055b792d2cbfde5d9c8c4df75e68ff0a";
-    hash = "sha256-QDqN6AAaEngWo4UxKAyIXB7BwCEJqsMTeuMb2fKu/9o=";
+    rev = "v${version}";
+    hash = "sha256-S8x3TGQEs+oh/3Q1Gz00M8dOcjjuHSgzVhqlbikZ8QE=";
   };
 
   buildInputs = [ olm ];
 
-  vendorHash = "sha256-ClHg3OEKgXYsmBm/aFKWZXbaLOmKdNyvw42QGhtTRik=";
+  vendorHash = "sha256-sUnvwPJQOoVzxbo2lS3CRcTrWsPjgYPsKClVw1wZJdM=";
 
   doCheck = false;
 
