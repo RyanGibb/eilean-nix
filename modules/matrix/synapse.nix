@@ -1,19 +1,28 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, ... }@inputs:
 
 with lib;
 let
   cfg = config.eilean;
-  turnSharedSecretFile = "/run/matrix-synapse/turn-shared-secret";
   domain = config.networking.domain;
   subdomain = "matrix.${domain}";
+  turnDomain = "turn.${domain}";
 in {
+  imports = [
+    "${inputs.nixpkgs-unstable}/nixos/modules/services/networking/livekit.nix"
+    "${inputs.nixpkgs-unstable}/nixos/modules/services/matrix/lk-jwt-service.nix"
+  ];
+
   options.eilean.matrix = {
     enable = mkEnableOption "matrix";
-    turn = mkOption {
+    registrationSecretFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+    };
+    call = mkOption {
       type = types.bool;
       default = true;
     };
-    registrationSecretFile = mkOption {
+    livekitKeys = mkOption {
       type = types.nullOr types.str;
       default = null;
     };
@@ -83,12 +92,18 @@ in {
             client = {
               "m.homeserver" = { "base_url" = "https://${subdomain}"; };
               "m.identity_server" = { "base_url" = "https://vector.im"; };
+              "org.matrix.msc4143.rtc_foci" = [{
+                "type" = "livekit";
+                "livekit_service_url" = "https://${subdomain}/livekit/jwt";
+              }];
             };
             # ACAO required to allow element-web on any URL to request this json file
             # set other headers due to https://github.com/yandex/gixy/blob/master/docs/en/plugins/addheaderredefinition.md
           in ''
             default_type application/json;
             add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+            add_header Access-Control-Allow-Headers "X-Requested-With, Content-Type, Authorization";
             add_header Strict-Transport-Security max-age=31536000 always;
             add_header X-Frame-Options SAMEORIGIN always;
             add_header X-Content-Type-Options nosniff always;
@@ -103,8 +118,6 @@ in {
           enableACME = lib.mkIf (!cfg.acme-eon) true;
           forceSSL = true;
 
-          # Or do a redirect instead of the 404, or whatever is appropriate for you.
-          # But do not put a Matrix Web client here! See the Element web section below.
           locations."/".extraConfig = ''
             return 404;
           '';
@@ -112,6 +125,34 @@ in {
           # forward all Matrix API calls to the synapse Matrix homeserver
           locations."~ ^(\\/_matrix|\\/_synapse\\/client)" = {
             proxyPass = "http://127.0.0.1:8008";
+          };
+
+          locations."^~ /livekit/jwt/" = {
+            proxyPass = "http://localhost:8080/";
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+            '';
+          };
+
+          locations."^~ /livekit/sfu/" = {
+            proxyPass = "http://localhost:7880/";
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+
+              proxy_send_timeout 120;
+              proxy_read_timeout 120;
+              proxy_buffering off;
+
+              proxy_set_header Accept-Encoding gzip;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+            '';
           };
         };
       };
@@ -142,37 +183,64 @@ in {
             ++ (optional cfg.matrix.bridges.messenger
               "/var/lib/mautrix-messenger/messenger-registration.yaml");
         }
-        (mkIf cfg.matrix.turn {
-          turn_uris = with config.services.coturn; [
-            "turn:${realm}:3478?transport=udp"
-            "turn:${realm}:3478?transport=tcp"
-            "turns:${realm}:5349?transport=udp"
-            "turns:${realm}:5349?transport=tcp"
-          ];
-          turn_user_lifetime = "1h";
+        (mkIf cfg.matrix.call {
+          experimental_features = {
+            msc3266_enabled = true;
+            msc4222_enabled = true;
+          };
+          max_event_delay_duration = "24h";
+          rc_message = {
+            per_second = 0.5;
+            burst_count = 30;
+          };
+          rc_delayed_event_mgmt = {
+            per_second = 1;
+            burst_count = 20;
+          };
         })
       ];
-      extraConfigFiles = mkIf cfg.matrix.turn ([ turnSharedSecretFile ]);
     };
 
-    systemd.services.matrix-synapse-turn-shared-secret-generator =
-      mkIf cfg.matrix.turn {
-        description = "Generate matrix synapse turn shared secret config file";
-        script = ''
-          mkdir -p "$(dirname '${turnSharedSecretFile}')"
-          echo "turn_shared_secret: $(cat '${config.services.coturn.static-auth-secret-file}')" > '${turnSharedSecretFile}'
-          chmod 770 '${turnSharedSecretFile}'
-          chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${turnSharedSecretFile}'
-        '';
-        serviceConfig.Type = "oneshot";
-        serviceConfig.RemainAfterExit = true;
-        after = [ "coturn-static-auth-secret-generator.service" ];
-        requires = [ "coturn-static-auth-secret-generator.service" ];
+    security.acme-eon.certs."${turnDomain}" =
+      lib.mkIf (cfg.acme-eon && cfg.matrix.call) {
+        reloadServices = [ "livekit" ];
       };
-    systemd.services."matrix-synapse".after = mkIf cfg.matrix.turn
-      [ "matrix-synapse-turn-shared-secret-generator.service" ];
-    systemd.services."matrix-synapse".requires = mkIf cfg.matrix.turn
-      [ "matrix-synapse-turn-shared-secret-generator.service" ];
+    services.livekit = mkIf cfg.matrix.call {
+      enable = true;
+      keyFile = cfg.matrix.livekitKeys;
+      package = (import inputs.nixpkgs-unstable {
+        system = config.nixpkgs.hostPlatform.system;
+      }).livekit;
+      settings = {
+        turn = {
+          enabled = true;
+          tls_port = 5349;
+          udp_port = 5349;
+          domain = turnDomain;
+          cert_file = "/run/credentials/livekit.service/turn-cert";
+          key_file = "/run/credentials/livekit.service/turn-key";
+        };
+      };
+    };
+    systemd.services.livekit.serviceConfig = let
+      certDir = if cfg.acme-eon then
+        config.security.acme-eon.certs.${turnDomain}.directory
+      else
+        config.security.acme.certs.${turnDomain}.directory;
+    in lib.mkIf cfg.matrix.call {
+      AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+      LoadCredential =
+        [ "turn-cert:${certDir}/fullchain.pem" "turn-key:${certDir}/key.pem" ];
+    };
+
+    services.lk-jwt-service = mkIf cfg.matrix.call {
+      enable = true;
+      livekitUrl = "wss://${subdomain}/livekit/sfu";
+      keyFile = config.services.livekit.keyFile;
+      package = (import inputs.nixpkgs-unstable {
+        system = config.nixpkgs.hostPlatform.system;
+      }).lk-jwt-service;
+    };
 
     systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups =
       # remove after https://github.com/NixOS/nixpkgs/pull/311681/files
@@ -237,13 +305,15 @@ in {
       settings.bridge.encryption.default = true;
     };
 
-    eilean.turn.enable = mkIf cfg.matrix.turn true;
-
     eilean.dns.enable = true;
     eilean.services.dns.zones.${domain}.records = [{
       name = "matrix";
       type = "CNAME";
       value = cfg.domainName;
-    }];
+    }] ++ lib.optional cfg.matrix.call {
+      name = "turn";
+      type = "CNAME";
+      value = cfg.domainName;
+    };
   };
 }
