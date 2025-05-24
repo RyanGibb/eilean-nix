@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }@inputs:
+{ config, pkgs, lib, ... }:
 
 with lib;
 let
@@ -7,11 +7,6 @@ let
   subdomain = "matrix.${domain}";
   turnDomain = "turn.${domain}";
 in {
-  imports = [
-    "${inputs.nixpkgs-unstable}/nixos/modules/services/networking/livekit.nix"
-    "${inputs.nixpkgs-unstable}/nixos/modules/services/matrix/lk-jwt-service.nix"
-  ];
-
   options.eilean.matrix = {
     enable = mkEnableOption "matrix";
     registrationSecretFile = mkOption {
@@ -208,9 +203,6 @@ in {
     services.livekit = mkIf cfg.matrix.call {
       enable = true;
       keyFile = cfg.matrix.livekitKeys;
-      package = (import inputs.nixpkgs-unstable {
-        system = config.nixpkgs.hostPlatform.system;
-      }).livekit;
       settings = {
         turn = {
           enabled = true;
@@ -237,9 +229,6 @@ in {
       enable = true;
       livekitUrl = "wss://${subdomain}/livekit/sfu";
       keyFile = config.services.livekit.keyFile;
-      package = (import inputs.nixpkgs-unstable {
-        system = config.nixpkgs.hostPlatform.system;
-      }).lk-jwt-service;
     };
 
     systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups =
