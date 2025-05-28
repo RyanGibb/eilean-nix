@@ -8,6 +8,7 @@
 
 Eilean enables you to host your own digital island where you control your own online infrastructure.
 Through the use of open standards and federated protocols Eilean allows you to interoperate with other providers.
+Read more at [ryan.freumh.org/eilean.html](https://ryan.freumh.org/eilean.html).
 
 [NixOS](https://nixos.org/) is used to enable reproducible deployments of services such as webservers, mailservers, federated communication servers, Virtual Private Network servers, and more.
 However, such services still require a lot of manual configuration for domain names, DNS records, user accounts, databases, HTTP proxies, TLS certificates, and more.
