@@ -25,8 +25,8 @@ in {
       fqdn = subdomain;
       domains = [ "${domain}" ];
 
-      loginAccounts = {
-        "system@${domain}" = mkIf (cfg.gitea.enable || cfg.mastodon.enable) {
+      loginAccounts = mkIf (cfg.gitea.enable || cfg.mastodon.enable) {
+        "system@${domain}" = {
           passwordFile = cfg.mailserver.systemAccountPasswordFile;
           aliases = [
             (mkIf cfg.gitea.enable "git@${domain}")
