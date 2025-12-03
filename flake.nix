@@ -1,7 +1,7 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-    nixos-mailserver.url = "gitlab:RyanGibb/nixos-mailserver/fork-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixos-mailserver.url = "gitlab:RyanGibb/nixos-mailserver/unhashed-password-25.11";
     eon.url = "github:RyanGibb/eon";
 
     eon.inputs.nixpkgs.follows = "nixpkgs";

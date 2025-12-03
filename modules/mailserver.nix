@@ -24,7 +24,6 @@ in {
       enable = true;
       fqdn = subdomain;
       domains = [ "${domain}" ];
-
       loginAccounts = mkIf (cfg.gitea.enable || cfg.mastodon.enable) {
         "system@${domain}" = {
           passwordFile = cfg.mailserver.systemAccountPasswordFile;
@@ -51,7 +50,7 @@ in {
       return 301 $scheme://${domain}$request_uri;
     '';
 
-    systemd.services.dovecot2 = lib.mkIf cfg.acme-eon {
+    systemd.services.dovecot = lib.mkIf cfg.acme-eon {
       wants = [ "acme-eon-${subdomain}.service" ];
       after = [ "acme-eon-${subdomain}.service" ];
     };
@@ -61,7 +60,7 @@ in {
       after = [ "acme-eon-${subdomain}.service" ];
     };
 
-    services.postfix.config = {
+    services.postfix.settings.main = {
       smtpd_tls_protocols =
         mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
       smtp_tls_protocols =
