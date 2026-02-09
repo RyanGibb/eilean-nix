@@ -5,9 +5,17 @@
     eilean.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, eilean, ... }@inputs:
-    let hostname = "eilean";
-    in rec {
+  outputs =
+    {
+      self,
+      nixpkgs,
+      eilean,
+      ...
+    }@inputs:
+    let
+      hostname = "eilean";
+    in
+    rec {
       nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
         system = null;
         pkgs = null;
@@ -19,8 +27,7 @@
             # pin nix command's nixpkgs flake to the system flake to avoid unnecessary downloads
             nix.registry.nixpkgs.flake = nixpkgs;
             # record git revision (can be queried with `nixos-version --json)
-            system.configurationRevision =
-              nixpkgs.lib.mkIf (self ? rev) self.rev;
+            system.configurationRevision = nixpkgs.lib.mkIf (self ? rev) self.rev;
           }
         ];
       };

@@ -1,12 +1,20 @@
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
   subdomain = "mastodon.${domain}";
-in {
-  options.eilean.mastodon = { enable = mkEnableOption "mastodon"; };
+in
+{
+  options.eilean.mastodon = {
+    enable = mkEnableOption "mastodon";
+  };
 
   config = mkIf cfg.mastodon.enable {
     services.mastodon = {
@@ -37,8 +45,7 @@ in {
       };
     };
 
-    users.groups.${config.services.mastodon.group}.members =
-      [ config.services.nginx.user ];
+    users.groups.${config.services.mastodon.group}.members = [ config.services.nginx.user ];
 
     security.acme-eon.nginxCerts = lib.mkIf cfg.acme-eon [ subdomain ];
 
@@ -62,12 +69,12 @@ in {
 
           locations."/system/".alias = "/var/lib/mastodon/public-system/";
 
-          locations."/" = { tryFiles = "$uri @proxy"; };
+          locations."/" = {
+            tryFiles = "$uri @proxy";
+          };
 
           locations."@proxy" = {
-            proxyPass = "http://127.0.0.1:${
-                builtins.toString config.services.mastodon.webPort
-              }";
+            proxyPass = "http://127.0.0.1:${builtins.toString config.services.mastodon.webPort}";
             proxyWebsockets = true;
           };
         };
@@ -75,10 +82,12 @@ in {
     };
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${config.networking.domain}.records = [{
-      name = "mastodon";
-      type = "CNAME";
-      value = cfg.domainName;
-    }];
+    eilean.services.dns.zones.${config.networking.domain}.records = [
+      {
+        name = "mastodon";
+        type = "CNAME";
+        value = cfg.domainName;
+      }
+    ];
   };
 }

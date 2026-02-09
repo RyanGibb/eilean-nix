@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 with lib;
 let
@@ -6,8 +11,11 @@ let
   domain = config.networking.domain;
   subdomain = "turn.${domain}";
   staticAuthSecretFile = "/run/coturn/static-auth-secret";
-in {
-  options.eilean.turn = { enable = mkEnableOption "TURN server"; };
+in
+{
+  options.eilean.turn = {
+    enable = mkEnableOption "TURN server";
+  };
 
   config = mkIf cfg.turn.enable {
     security.acme-eon.certs."${subdomain}" = lib.mkIf cfg.acme-eon {
@@ -15,23 +23,29 @@ in {
       reloadServices = [ "coturn" ];
     };
 
-    services.coturn = let
-      certDir = if cfg.acme-eon then
-        config.security.acme-eon.certs.${subdomain}.directory
-      else
-        config.security.acme.certs.${subdomain}.directory;
-    in {
-      enable = true;
-      no-cli = true;
-      no-tcp-relay = true;
-      secure-stun = true;
-      use-auth-secret = true;
-      static-auth-secret-file = staticAuthSecretFile;
-      realm = subdomain;
-      relay-ips = with config.eilean; [ serverIpv4 serverIpv6 ];
-      cert = "${certDir}/fullchain.pem";
-      pkey = "${certDir}/key.pem";
-    };
+    services.coturn =
+      let
+        certDir =
+          if cfg.acme-eon then
+            config.security.acme-eon.certs.${subdomain}.directory
+          else
+            config.security.acme.certs.${subdomain}.directory;
+      in
+      {
+        enable = true;
+        no-cli = true;
+        no-tcp-relay = true;
+        secure-stun = true;
+        use-auth-secret = true;
+        static-auth-secret-file = staticAuthSecretFile;
+        realm = subdomain;
+        relay-ips = with config.eilean; [
+          serverIpv4
+          serverIpv6
+        ];
+        cert = "${certDir}/fullchain.pem";
+        pkey = "${certDir}/key.pem";
+      };
 
     systemd.services = {
       coturn-static-auth-secret-generator = {
@@ -49,14 +63,17 @@ in {
         serviceConfig.RemainAfterExit = true;
       };
       "coturn" = {
-        after = [ "coturn-static-auth-secret-generator.service" ]
-          ++ lib.lists.optional cfg.acme-eon "acme-eon-${subdomain}.service";
+        after = [
+          "coturn-static-auth-secret-generator.service"
+        ]
+        ++ lib.lists.optional cfg.acme-eon "acme-eon-${subdomain}.service";
         requires = [ "coturn-static-auth-secret-generator.service" ];
         wants = lib.lists.optional cfg.acme-eon "acme-eon-${subdomain}.service";
       };
     };
 
-    networking.firewall = with config.services.coturn;
+    networking.firewall =
+      with config.services.coturn;
       let
         turn-range = {
           from = min-port;
@@ -69,19 +86,18 @@ in {
           #alt-listening-port
           #alt-tls-listening-port
         ];
-      in {
+      in
+      {
         allowedTCPPorts = stun-ports;
         allowedTCPPortRanges = [ turn-range ];
         allowedUDPPorts = stun-ports;
         allowedUDPPortRanges = [ turn-range ];
       };
 
-    security.acme.certs.${config.services.coturn.realm} =
-      lib.mkIf (!cfg.acme-eon) {
-        postRun =
-          "systemctl reload nginx.service; systemctl restart coturn.service";
-        group = "turnserver";
-      };
+    security.acme.certs.${config.services.coturn.realm} = lib.mkIf (!cfg.acme-eon) {
+      postRun = "systemctl reload nginx.service; systemctl restart coturn.service";
+      group = "turnserver";
+    };
     services.nginx.enable = lib.mkIf (!cfg.acme-eon) true;
     services.nginx.virtualHosts = lib.mkIf (!cfg.acme-eon) {
       "${config.services.coturn.realm}" = {
@@ -89,14 +105,15 @@ in {
         enableACME = true;
       };
     };
-    users.groups."turnserver".members =
-      lib.mkIf (!cfg.acme-eon) [ config.services.nginx.user ];
+    users.groups."turnserver".members = lib.mkIf (!cfg.acme-eon) [ config.services.nginx.user ];
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${config.networking.domain}.records = [{
-      name = "turn";
-      type = "CNAME";
-      value = cfg.domainName;
-    }];
+    eilean.services.dns.zones.${config.networking.domain}.records = [
+      {
+        name = "turn";
+        type = "CNAME";
+        value = cfg.domainName;
+      }
+    ];
   };
 }

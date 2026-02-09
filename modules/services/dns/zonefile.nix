@@ -1,4 +1,11 @@
-{ pkgs, config, lib, zonename, zone, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  zonename,
+  zone,
+  ...
+}:
 
 pkgs.writeTextFile {
   name = "zonefile-${zonename}";
@@ -13,8 +20,8 @@ pkgs.writeTextFile {
       ${builtins.toString zone.soa.expire}
       ${builtins.toString zone.soa.negativeCacheTtl}
     )
-    ${lib.strings.concatStringsSep "\n" (builtins.map
-      (rr: "${rr.name} IN ${builtins.toString rr.ttl} ${rr.type} ${rr.value}")
-      zone.records)}
+    ${lib.strings.concatStringsSep "\n" (
+      builtins.map (rr: "${rr.name} IN ${builtins.toString rr.ttl} ${rr.type} ${rr.value}") zone.records
+    )}
   '';
 }

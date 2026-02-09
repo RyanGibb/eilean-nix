@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 with lib;
 let
@@ -7,7 +12,8 @@ let
   livekitKeyFile = "/run/matrix-synapse/livekit-key";
   domain = config.networking.domain;
   subdomain = "matrix.${domain}";
-in {
+in
+{
   options.eilean.matrix = {
     enable = mkEnableOption "matrix";
     turn = mkOption {
@@ -57,7 +63,10 @@ in {
         LC_CTYPE = "C";
     '';
 
-    security.acme-eon.nginxCerts = lib.mkIf cfg.acme-eon [ domain subdomain ];
+    security.acme-eon.nginxCerts = lib.mkIf cfg.acme-eon [
+      domain
+      subdomain
+    ];
 
     services.nginx = {
       enable = true;
@@ -76,36 +85,49 @@ in {
           enableACME = lib.mkIf (!cfg.acme-eon) true;
           forceSSL = true;
 
-          locations."= /.well-known/matrix/server".extraConfig = let
-            # use 443 instead of the default 8448 port to unite
-            # the client-server and server-server port for simplicity
-            server = { "m.server" = "${subdomain}:443"; };
-          in ''
-            default_type application/json;
-            return 200 '${builtins.toJSON server}';
-          '';
-          locations."= /.well-known/matrix/client".extraConfig = let
-            client = {
-              "m.homeserver" = { "base_url" = "https://${subdomain}"; };
-              "m.identity_server" = { "base_url" = "https://vector.im"; };
-            } // (lib.optionalAttrs cfg.matrix.elementCall {
-              "org.matrix.msc4143.rtc_foci" = [{
-                "type" = "livekit";
-                "livekit_service_url" = "https://${domain}/livekit/jwt";
-              }];
-            });
-            # ACAO required to allow element-web on any URL to request this json file
-            # set other headers due to https://github.com/yandex/gixy/blob/master/docs/en/plugins/addheaderredefinition.md
-          in ''
-            default_type application/json;
-            add_header Access-Control-Allow-Origin *;
-            add_header Strict-Transport-Security max-age=31536000 always;
-            add_header X-Frame-Options SAMEORIGIN always;
-            add_header X-Content-Type-Options nosniff always;
-            add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; frame-src 'self'; frame-ancestors 'self'; form-action 'self';" always;
-            add_header Referrer-Policy 'same-origin';
-            return 200 '${builtins.toJSON client}';
-          '';
+          locations."= /.well-known/matrix/server".extraConfig =
+            let
+              # use 443 instead of the default 8448 port to unite
+              # the client-server and server-server port for simplicity
+              server = {
+                "m.server" = "${subdomain}:443";
+              };
+            in
+            ''
+              default_type application/json;
+              return 200 '${builtins.toJSON server}';
+            '';
+          locations."= /.well-known/matrix/client".extraConfig =
+            let
+              client = {
+                "m.homeserver" = {
+                  "base_url" = "https://${subdomain}";
+                };
+                "m.identity_server" = {
+                  "base_url" = "https://vector.im";
+                };
+              }
+              // (lib.optionalAttrs cfg.matrix.elementCall {
+                "org.matrix.msc4143.rtc_foci" = [
+                  {
+                    "type" = "livekit";
+                    "livekit_service_url" = "https://${domain}/livekit/jwt";
+                  }
+                ];
+              });
+              # ACAO required to allow element-web on any URL to request this json file
+              # set other headers due to https://github.com/yandex/gixy/blob/master/docs/en/plugins/addheaderredefinition.md
+            in
+            ''
+              default_type application/json;
+              add_header Access-Control-Allow-Origin *;
+              add_header Strict-Transport-Security max-age=31536000 always;
+              add_header X-Frame-Options SAMEORIGIN always;
+              add_header X-Content-Type-Options nosniff always;
+              add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; frame-src 'self'; frame-ancestors 'self'; form-action 'self';" always;
+              add_header Referrer-Policy 'same-origin';
+              return 200 '${builtins.toJSON client}';
+            '';
 
           # LiveKit JWT service proxy
           locations."/livekit/jwt/" = mkIf cfg.matrix.elementCall {
@@ -156,22 +178,31 @@ in {
           enable_registration = true;
           registration_requires_token = true;
           registration_shared_secret_path = cfg.matrix.registrationSecretFile;
-          listeners = [{
-            port = 8008;
-            bind_addresses = [ "::1" "127.0.0.1" ];
-            type = "http";
-            tls = false;
-            x_forwarded = true;
-            resources = [{
-              names = [ "client" "federation" ];
-              compress = false;
-            }];
-          }];
+          listeners = [
+            {
+              port = 8008;
+              bind_addresses = [
+                "::1"
+                "127.0.0.1"
+              ];
+              type = "http";
+              tls = false;
+              x_forwarded = true;
+              resources = [
+                {
+                  names = [
+                    "client"
+                    "federation"
+                  ];
+                  compress = false;
+                }
+              ];
+            }
+          ];
           max_upload_size = "100M";
-          app_service_config_files = (optional cfg.matrix.bridges.instagram
-            "/var/lib/mautrix-instagram/instagram-registration.yaml")
-            ++ (optional cfg.matrix.bridges.messenger
-              "/var/lib/mautrix-messenger/messenger-registration.yaml");
+          app_service_config_files =
+            (optional cfg.matrix.bridges.instagram "/var/lib/mautrix-instagram/instagram-registration.yaml")
+            ++ (optional cfg.matrix.bridges.messenger "/var/lib/mautrix-messenger/messenger-registration.yaml");
         }
         (mkIf cfg.matrix.turn {
           turn_uris = with config.services.coturn; [
@@ -186,61 +217,64 @@ in {
       extraConfigFiles = mkIf cfg.matrix.turn ([ turnSharedSecretFile ]);
     };
 
-    systemd.services.matrix-synapse-turn-shared-secret-generator =
-      mkIf cfg.matrix.turn {
-        description = "Generate matrix synapse turn shared secret config file";
-        script = ''
-          mkdir -p "$(dirname '${turnSharedSecretFile}')"
-          echo "turn_shared_secret: $(cat '${config.services.coturn.static-auth-secret-file}')" > '${turnSharedSecretFile}'
-          chmod 770 '${turnSharedSecretFile}'
-          chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${turnSharedSecretFile}'
-        '';
-        serviceConfig.Type = "oneshot";
-        serviceConfig.RemainAfterExit = true;
-        after = [ "coturn-static-auth-secret-generator.service" ];
-        requires = [ "coturn-static-auth-secret-generator.service" ];
-      };
-    systemd.services.matrix-synapse-livekit-key-generator =
-      mkIf cfg.matrix.elementCall {
-        description = "Generate LiveKit key file for Matrix Synapse";
-        script = ''
-          if [ ! -f '${livekitKeyFile}' ]; then
-            umask 077
-            DIR="$(dirname '${livekitKeyFile}')"
-            mkdir -p "$DIR"
-            KEY_NAME="lk-jwt-service"
-            SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 48)
-            echo "$KEY_NAME: $SECRET" > '${livekitKeyFile}'
-            chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${livekitKeyFile}'
-          fi
-        '';
-        serviceConfig.Type = "oneshot";
-        serviceConfig.RemainAfterExit = true;
-      };
+    systemd.services.matrix-synapse-turn-shared-secret-generator = mkIf cfg.matrix.turn {
+      description = "Generate matrix synapse turn shared secret config file";
+      script = ''
+        mkdir -p "$(dirname '${turnSharedSecretFile}')"
+        echo "turn_shared_secret: $(cat '${config.services.coturn.static-auth-secret-file}')" > '${turnSharedSecretFile}'
+        chmod 770 '${turnSharedSecretFile}'
+        chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${turnSharedSecretFile}'
+      '';
+      serviceConfig.Type = "oneshot";
+      serviceConfig.RemainAfterExit = true;
+      after = [ "coturn-static-auth-secret-generator.service" ];
+      requires = [ "coturn-static-auth-secret-generator.service" ];
+    };
+    systemd.services.matrix-synapse-livekit-key-generator = mkIf cfg.matrix.elementCall {
+      description = "Generate LiveKit key file for Matrix Synapse";
+      script = ''
+        if [ ! -f '${livekitKeyFile}' ]; then
+          umask 077
+          DIR="$(dirname '${livekitKeyFile}')"
+          mkdir -p "$DIR"
+          KEY_NAME="lk-jwt-service"
+          SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 48)
+          echo "$KEY_NAME: $SECRET" > '${livekitKeyFile}'
+          chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${livekitKeyFile}'
+        fi
+      '';
+      serviceConfig.Type = "oneshot";
+      serviceConfig.RemainAfterExit = true;
+    };
 
     systemd.services."matrix-synapse".after =
       (optional cfg.matrix.turn "matrix-synapse-turn-shared-secret-generator.service")
-      ++ (optionals cfg.matrix.elementCall [ "matrix-synapse-livekit-key-generator.service" "livekit.service" "lk-jwt-service.service" ]);
+      ++ (optionals cfg.matrix.elementCall [
+        "matrix-synapse-livekit-key-generator.service"
+        "livekit.service"
+        "lk-jwt-service.service"
+      ]);
     systemd.services."matrix-synapse".requires =
       (optional cfg.matrix.turn "matrix-synapse-turn-shared-secret-generator.service")
       ++ (optional cfg.matrix.elementCall "matrix-synapse-livekit-key-generator.service");
-    systemd.services."livekit".after = mkIf cfg.matrix.elementCall
-      [ "matrix-synapse-livekit-key-generator.service" ];
-    systemd.services."livekit".requires = mkIf cfg.matrix.elementCall
-      [ "matrix-synapse-livekit-key-generator.service" ];
-    systemd.services."lk-jwt-service".after = mkIf cfg.matrix.elementCall
-      [ "matrix-synapse-livekit-key-generator.service" ];
-    systemd.services."lk-jwt-service".requires = mkIf cfg.matrix.elementCall
-      [ "matrix-synapse-livekit-key-generator.service" ];
+    systemd.services."livekit".after = mkIf cfg.matrix.elementCall [
+      "matrix-synapse-livekit-key-generator.service"
+    ];
+    systemd.services."livekit".requires = mkIf cfg.matrix.elementCall [
+      "matrix-synapse-livekit-key-generator.service"
+    ];
+    systemd.services."lk-jwt-service".after = mkIf cfg.matrix.elementCall [
+      "matrix-synapse-livekit-key-generator.service"
+    ];
+    systemd.services."lk-jwt-service".requires = mkIf cfg.matrix.elementCall [
+      "matrix-synapse-livekit-key-generator.service"
+    ];
 
     systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups =
       # remove after https://github.com/NixOS/nixpkgs/pull/311681/files
-      (optional cfg.matrix.bridges.whatsapp
-        config.systemd.services.mautrix-whatsapp.serviceConfig.Group)
-      ++ (optional cfg.matrix.bridges.instagram
-        config.systemd.services.mautrix-instagram.serviceConfig.Group)
-      ++ (optional cfg.matrix.bridges.messenger
-        config.systemd.services.mautrix-messenger.serviceConfig.Group);
+      (optional cfg.matrix.bridges.whatsapp config.systemd.services.mautrix-whatsapp.serviceConfig.Group)
+      ++ (optional cfg.matrix.bridges.instagram config.systemd.services.mautrix-instagram.serviceConfig.Group)
+      ++ (optional cfg.matrix.bridges.messenger config.systemd.services.mautrix-messenger.serviceConfig.Group);
 
     services.mautrix-whatsapp = mkIf cfg.matrix.bridges.whatsapp {
       enable = true;
@@ -250,8 +284,7 @@ in {
       settings.appservice.address = "http://localhost:29318";
       settings.bridge.personal_filtering_spaces = true;
       settings.bridge.history_sync.backfill = false;
-      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
-        "admin";
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" = "admin";
       settings.bridge.encryption.allow = true;
       settings.bridge.encryption.default = true;
     };
@@ -263,8 +296,7 @@ in {
       settings.appservice.hostname = "localhost";
       settings.appservice.address = "http://localhost:29328";
       settings.bridge.personal_filtering_spaces = true;
-      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
-        "admin";
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" = "admin";
       settings.bridge.encryption.allow = true;
       settings.bridge.encryption.default = true;
     };
@@ -277,8 +309,7 @@ in {
       settings.appservice.address = "http://localhost:29319";
       settings.bridge.personal_filtering_spaces = true;
       settings.bridge.backfill.enabled = false;
-      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
-        "admin";
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" = "admin";
       settings.bridge.encryption.allow = true;
       settings.bridge.encryption.default = true;
     };
@@ -290,8 +321,7 @@ in {
       settings.appservice.address = "http://localhost:29320";
       settings.bridge.personal_filtering_spaces = true;
       settings.bridge.backfill.enabled = false;
-      settings.bridge.permissions."@${config.eilean.username}:${domain}" =
-        "admin";
+      settings.bridge.permissions."@${config.eilean.username}:${domain}" = "admin";
       settings.bridge.encryption.allow = true;
       settings.bridge.encryption.default = true;
     };
@@ -320,10 +350,12 @@ in {
     eilean.turn.enable = mkIf cfg.matrix.turn true;
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${domain}.records = [{
-      name = "matrix";
-      type = "CNAME";
-      value = cfg.domainName;
-    }];
+    eilean.services.dns.zones.${domain}.records = [
+      {
+        name = "matrix";
+        type = "CNAME";
+        value = cfg.domainName;
+      }
+    ];
   };
 }

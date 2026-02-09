@@ -1,8 +1,15 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 with lib;
-let cfg = config.eilean;
-in {
+let
+  cfg = config.eilean;
+in
+{
   options.eilean.fail2ban = {
     enable = mkEnableOption "TURN server";
     radicale = mkOption {

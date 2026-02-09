@@ -8,32 +8,44 @@
     nixos-mailserver.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, nixos-mailserver, eon, ... }: {
-    packages = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (system:
-      let pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        manpage = import ./man { inherit pkgs system nixos-mailserver; };
-        packages.mautrix-meta = (pkgs.callPackage ./pkgs/mautrix-meta.nix { });
-      });
-
-    nixosModules.default = {
-      imports = [
-        ./modules/default.nix
-        nixos-mailserver.nixosModule
-        eon.nixosModules.default
-        eon.nixosModules.acme
+  outputs =
+    {
+      nixpkgs,
+      nixos-mailserver,
+      eon,
+      ...
+    }:
+    {
+      packages = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
         {
-          nixpkgs.overlays = [
-            (final: prev: {
-              mautrix-meta = (prev.callPackage ./pkgs/mautrix-meta.nix { });
-            })
-          ];
+          manpage = import ./man { inherit pkgs system nixos-mailserver; };
+          packages.mautrix-meta = (pkgs.callPackage ./pkgs/mautrix-meta.nix { });
         }
-      ];
-    };
-    defaultTemplate.path = ./template;
+      );
 
-    formatter = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed
-      (system: nixpkgs.legacyPackages.${system}.nixfmt);
-  };
+      nixosModules.default = {
+        imports = [
+          ./modules/default.nix
+          nixos-mailserver.nixosModule
+          eon.nixosModules.default
+          eon.nixosModules.acme
+          {
+            nixpkgs.overlays = [
+              (final: prev: {
+                mautrix-meta = (prev.callPackage ./pkgs/mautrix-meta.nix { });
+              })
+            ];
+          }
+        ];
+      };
+      defaultTemplate.path = ./template;
+
+      formatter = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (
+        system: nixpkgs.legacyPackages.${system}.nixfmt
+      );
+    };
 }

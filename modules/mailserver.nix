@@ -1,11 +1,17 @@
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 let
   cfg = config.eilean;
   domain = config.networking.domain;
   subdomain = "mail.${domain}";
-in {
+in
+{
   options.eilean.mailserver = {
     enable = mkEnableOption "mailserver";
     systemAccountPasswordFile = mkOption {
@@ -17,7 +23,10 @@ in {
   config = mkIf cfg.mailserver.enable {
     security.acme-eon.certs."${subdomain}" = lib.mkIf cfg.acme-eon {
       group = "turnserver";
-      reloadServices = [ "postfix.service" "dovecot.service" ];
+      reloadServices = [
+        "postfix.service"
+        "dovecot.service"
+      ];
     };
 
     mailserver = {
@@ -38,10 +47,9 @@ in {
       # down nginx and opens port 80.
       certificateScheme = if cfg.acme-eon then "manual" else "acme-nginx";
       certificateFile = lib.mkIf cfg.acme-eon "${
-          config.security.acme-eon.certs.${subdomain}.directory
-        }/fullchain.pem";
-      keyFile = lib.mkIf cfg.acme-eon
-        "${config.security.acme-eon.certs.${subdomain}.directory}/key.pem";
+        config.security.acme-eon.certs.${subdomain}.directory
+      }/fullchain.pem";
+      keyFile = lib.mkIf cfg.acme-eon "${config.security.acme-eon.certs.${subdomain}.directory}/key.pem";
       localDnsResolver = false;
     };
 
@@ -61,14 +69,10 @@ in {
     };
 
     services.postfix.settings.main = {
-      smtpd_tls_protocols =
-        mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtp_tls_protocols =
-        mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtpd_tls_mandatory_protocols =
-        mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtp_tls_mandatory_protocols =
-        mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtpd_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtp_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtpd_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtp_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
     };
 
     eilean.dns.enable = true;

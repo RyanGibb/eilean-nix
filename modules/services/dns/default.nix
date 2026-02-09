@@ -1,4 +1,9 @@
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 let
@@ -35,28 +40,37 @@ let
         default = 3600; # 1hr
       };
     };
-    records = let
-      recordOpts.options = {
-        name = mkOption { type = types.str; };
-        ttl = mkOption {
-          type = with types; nullOr int;
-          default = null;
+    records =
+      let
+        recordOpts.options = {
+          name = mkOption { type = types.str; };
+          ttl = mkOption {
+            type = with types; nullOr int;
+            default = null;
+          };
+          type = mkOption { type = types.str; };
+          value = mkOption { type = types.str; };
         };
-        type = mkOption { type = types.str; };
-        value = mkOption { type = types.str; };
+      in
+      mkOption {
+        type = with types; listOf (submodule recordOpts);
+        default = [ ];
       };
-    in mkOption {
-      type = with types; listOf (submodule recordOpts);
-      default = [ ];
-    };
   };
-in {
-  imports = [ ./bind.nix ./eon.nix ];
+in
+{
+  imports = [
+    ./bind.nix
+    ./eon.nix
+  ];
 
   options.eilean.services.dns = {
     enable = mkEnableOption "DNS server";
     server = mkOption {
-      type = types.enum [ "bind" "eon" ];
+      type = types.enum [
+        "bind"
+        "eon"
+      ];
       default = if config.eilean.acme-eon then "eon" else "bind";
     };
     openFirewall = mkOption {

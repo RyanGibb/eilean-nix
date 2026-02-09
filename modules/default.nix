@@ -1,4 +1,9 @@
-{ pkgs, lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 
 with lib;
 
@@ -34,10 +39,10 @@ with lib;
   config = {
     # TODO install manpage
     environment.systemPackages = [ ];
-    security.acme.defaults.email = lib.mkIf (!config.eilean.acme-eon)
-      "${config.eilean.username}@${config.networking.domain}";
-    security.acme-eon.defaults.email = lib.mkIf config.eilean.acme-eon
-      "${config.eilean.username}@${config.networking.domain}";
+    security.acme.defaults.email = lib.mkIf (
+      !config.eilean.acme-eon
+    ) "${config.eilean.username}@${config.networking.domain}";
+    security.acme-eon.defaults.email = lib.mkIf config.eilean.acme-eon "${config.eilean.username}@${config.networking.domain}";
     networking.firewall.allowedTCPPorts = mkIf config.services.nginx.enable [
       80 # HTTP
       443 # HTTPS

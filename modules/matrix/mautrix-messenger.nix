@@ -1,12 +1,15 @@
-{ lib, config, pkgs, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 let
   cfg = config.services.mautrix-messenger;
   dataDir = "/var/lib/mautrix-messenger";
   registrationFile = "${dataDir}/messenger-registration.yaml";
   settingsFile = "${dataDir}/config.json";
-  settingsFileUnsubstituted =
-    settingsFormat.generate "mautrix-messenger-config-unsubstituted.json"
-    cfg.settings;
+  settingsFileUnsubstituted = settingsFormat.generate "mautrix-messenger-config-unsubstituted.json" cfg.settings;
   settingsFormat = pkgs.formats.json { };
   appservicePort = 29320;
 
@@ -43,10 +46,12 @@ let
     };
   };
 
-in {
+in
+{
   options.services.mautrix-messenger = {
-    enable = lib.mkEnableOption (lib.mdDoc
-      "mautrix-messenger, a puppeting/relaybot bridge between Matrix and Messenger.");
+    enable = lib.mkEnableOption (
+      lib.mdDoc "mautrix-messenger, a puppeting/relaybot bridge between Matrix and Messenger."
+    );
 
     settings = lib.mkOption {
       type = settingsFormat.type;
@@ -66,7 +71,9 @@ in {
           ephemeral_events = false;
         };
         bridge = {
-          history_sync = { request_full_sync = true; };
+          history_sync = {
+            request_full_sync = true;
+          };
           private_chat_portal_meta = true;
           mute_bridging = true;
           encryption = {
@@ -74,16 +81,19 @@ in {
             default = true;
             require = true;
           };
-          provisioning = { shared_secret = "disable"; };
-          permissions = { "example.com" = "user"; };
+          provisioning = {
+            shared_secret = "disable";
+          };
+          permissions = {
+            "example.com" = "user";
+          };
         };
       };
     };
 
     serviceDependencies = lib.mkOption {
       type = with lib.types; listOf str;
-      default = lib.optional config.services.matrix-synapse.enable
-        config.services.matrix-synapse.serviceUnit;
+      default = lib.optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnit;
       defaultText = lib.literalExpression ''
         optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnits
       '';
@@ -104,13 +114,15 @@ in {
 
     users.groups.mautrix-messenger = { };
 
-    services.mautrix-messenger.settings = lib.mkMerge (map mkDefaults [
-      defaultConfig
-      # Note: this is defined here to avoid the docs depending on `config`
-      {
-        homeserver.domain = config.services.matrix-synapse.settings.server_name;
-      }
-    ]);
+    services.mautrix-messenger.settings = lib.mkMerge (
+      map mkDefaults [
+        defaultConfig
+        # Note: this is defined here to avoid the docs depending on `config`
+        {
+          homeserver.domain = config.services.matrix-synapse.settings.server_name;
+        }
+      ]
+    );
 
     systemd.services.mautrix-messenger = {
       description = "Mautrix-Messenger Service - A Messenger bridge for Matrix";

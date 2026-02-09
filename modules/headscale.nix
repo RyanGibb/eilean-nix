@@ -1,8 +1,15 @@
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
-let cfg = config.eilean;
-in {
+let
+  cfg = config.eilean;
+in
+{
   options.eilean.headscale = with lib; {
     enable = mkEnableOption "headscale";
     zone = mkOption {
@@ -29,7 +36,10 @@ in {
       settings = {
         server_url = "https://${cfg.headscale.domain}";
         logtail.enabled = false;
-        ip_prefixes = [ "100.64.0.0/10" "fd7a:115c:a1e0::/48" ];
+        ip_prefixes = [
+          "100.64.0.0/10"
+          "fd7a:115c:a1e0::/48"
+        ];
       };
     };
 
@@ -39,8 +49,7 @@ in {
         forceSSL = true;
         enableACME = true;
         locations."/" = {
-          proxyPass = with config.services.headscale;
-            "http://${address}:${toString port}";
+          proxyPass = with config.services.headscale; "http://${address}:${toString port}";
           proxyWebsockets = true;
         };
       };
@@ -49,10 +58,12 @@ in {
     environment.systemPackages = [ config.services.headscale.package ];
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${cfg.headscale.zone}.records = [{
-      name = "${cfg.headscale.domain}.";
-      type = "CNAME";
-      value = cfg.domainName;
-    }];
+    eilean.services.dns.zones.${cfg.headscale.zone}.records = [
+      {
+        name = "${cfg.headscale.domain}.";
+        type = "CNAME";
+        value = cfg.domainName;
+      }
+    ];
   };
 }

@@ -1,4 +1,9 @@
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 let
@@ -6,17 +11,20 @@ let
   domain = config.networking.domain;
   passwdDir = "/var/lib/radicale/users";
   passwdFile = "${passwdDir}/passwd";
-  userOps = { name, ... }: {
-    options = {
-      name = mkOption {
-        type = types.str;
-        readOnly = true;
-        default = name;
+  userOps =
+    { name, ... }:
+    {
+      options = {
+        name = mkOption {
+          type = types.str;
+          readOnly = true;
+          default = name;
+        };
+        passwordFile = mkOption { type = types.nullOr types.str; };
       };
-      passwordFile = mkOption { type = types.nullOr types.str; };
     };
-  };
-in {
+in
+{
   options.eilean.radicale = {
     enable = mkEnableOption "radicale";
     users = mkOption {
@@ -29,13 +37,17 @@ in {
     services.radicale = {
       enable = true;
       settings = {
-        server = { hosts = [ "0.0.0.0:5232" ]; };
+        server = {
+          hosts = [ "0.0.0.0:5232" ];
+        };
         auth = {
           type = "htpasswd";
           htpasswd_filename = passwdFile;
           htpasswd_encryption = "bcrypt";
         };
-        storage = { filesystem_folder = "/var/lib/radicale/collections"; };
+        storage = {
+          filesystem_folder = "/var/lib/radicale/collections";
+        };
       };
     };
 
@@ -51,10 +63,12 @@ in {
 
         cat <<EOF > ${passwdFile}
 
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value:
-          ''
-            $(${pkgs.apacheHttpd}/bin/htpasswd -nbB "${name}" "$(head -n 2 ${value.passwordFile})")'')
-          cfg.radicale.users)}
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (
+            name: value:
+            ''$(${pkgs.apacheHttpd}/bin/htpasswd -nbB "${name}" "$(head -n 2 ${value.passwordFile})")''
+          ) cfg.radicale.users
+        )}
         EOF
       '';
     };
@@ -66,16 +80,20 @@ in {
         "cal.${domain}" = {
           forceSSL = true;
           enableACME = true;
-          locations."/" = { proxyPass = "http://localhost:5232"; };
+          locations."/" = {
+            proxyPass = "http://localhost:5232";
+          };
         };
       };
     };
 
     eilean.dns.enable = true;
-    eilean.services.dns.zones.${domain}.records = [{
-      name = "cal";
-      type = "CNAME";
-      value = cfg.domainName;
-    }];
+    eilean.services.dns.zones.${domain}.records = [
+      {
+        name = "cal";
+        type = "CNAME";
+        value = cfg.domainName;
+      }
+    ];
   };
 }
