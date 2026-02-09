@@ -4,6 +4,7 @@ with lib;
 let
   cfg = config.eilean;
   turnSharedSecretFile = "/run/matrix-synapse/turn-shared-secret";
+  livekitKeyFile = "/run/matrix-synapse/livekit-key";
   domain = config.networking.domain;
   subdomain = "matrix.${domain}";
 in {
@@ -12,6 +13,11 @@ in {
     turn = mkOption {
       type = types.bool;
       default = true;
+    };
+    elementCall = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Enable Element Call support via LiveKit";
     };
     registrationSecretFile = mkOption {
       type = types.nullOr types.str;
@@ -82,7 +88,12 @@ in {
             client = {
               "m.homeserver" = { "base_url" = "https://${subdomain}"; };
               "m.identity_server" = { "base_url" = "https://vector.im"; };
-            };
+            } // (lib.optionalAttrs cfg.matrix.elementCall {
+              "org.matrix.msc4143.rtc_foci" = [{
+                "type" = "livekit";
+                "livekit_service_url" = "https://${domain}/livekit/jwt";
+              }];
+            });
             # ACAO required to allow element-web on any URL to request this json file
             # set other headers due to https://github.com/yandex/gixy/blob/master/docs/en/plugins/addheaderredefinition.md
           in ''
@@ -95,6 +106,27 @@ in {
             add_header Referrer-Policy 'same-origin';
             return 200 '${builtins.toJSON client}';
           '';
+
+          # LiveKit JWT service proxy
+          locations."/livekit/jwt/" = mkIf cfg.matrix.elementCall {
+            proxyPass = "http://127.0.0.1:${toString config.services.lk-jwt-service.port}/";
+            extraConfig = ''
+              proxy_set_header X-Forwarded-For $remote_addr;
+              proxy_set_header X-Forwarded-Proto $scheme;
+            '';
+          };
+
+          # LiveKit SFU WebSocket proxy
+          locations."/livekit/sfu/" = mkIf cfg.matrix.elementCall {
+            proxyPass = "http://127.0.0.1:${toString config.services.livekit.settings.port}/";
+            proxyWebsockets = true;
+            extraConfig = ''
+              proxy_read_timeout 600s;
+              proxy_send_timeout 600s;
+              proxy_set_header X-Forwarded-For $remote_addr;
+              proxy_set_header X-Forwarded-Proto $scheme;
+            '';
+          };
         };
 
         # Reverse proxy for Matrix client-server and server-server communication
@@ -168,10 +200,38 @@ in {
         after = [ "coturn-static-auth-secret-generator.service" ];
         requires = [ "coturn-static-auth-secret-generator.service" ];
       };
-    systemd.services."matrix-synapse".after = mkIf cfg.matrix.turn
-      [ "matrix-synapse-turn-shared-secret-generator.service" ];
-    systemd.services."matrix-synapse".requires = mkIf cfg.matrix.turn
-      [ "matrix-synapse-turn-shared-secret-generator.service" ];
+    systemd.services.matrix-synapse-livekit-key-generator =
+      mkIf cfg.matrix.elementCall {
+        description = "Generate LiveKit key file for Matrix Synapse";
+        script = ''
+          if [ ! -f '${livekitKeyFile}' ]; then
+            umask 077
+            DIR="$(dirname '${livekitKeyFile}')"
+            mkdir -p "$DIR"
+            KEY_NAME="lk-jwt-service"
+            SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 48)
+            echo "$KEY_NAME: $SECRET" > '${livekitKeyFile}'
+            chown ${config.systemd.services.matrix-synapse.serviceConfig.User}:${config.systemd.services.matrix-synapse.serviceConfig.Group} '${livekitKeyFile}'
+          fi
+        '';
+        serviceConfig.Type = "oneshot";
+        serviceConfig.RemainAfterExit = true;
+      };
+
+    systemd.services."matrix-synapse".after =
+      (optional cfg.matrix.turn "matrix-synapse-turn-shared-secret-generator.service")
+      ++ (optionals cfg.matrix.elementCall [ "matrix-synapse-livekit-key-generator.service" "livekit.service" "lk-jwt-service.service" ]);
+    systemd.services."matrix-synapse".requires =
+      (optional cfg.matrix.turn "matrix-synapse-turn-shared-secret-generator.service")
+      ++ (optional cfg.matrix.elementCall "matrix-synapse-livekit-key-generator.service");
+    systemd.services."livekit".after = mkIf cfg.matrix.elementCall
+      [ "matrix-synapse-livekit-key-generator.service" ];
+    systemd.services."livekit".requires = mkIf cfg.matrix.elementCall
+      [ "matrix-synapse-livekit-key-generator.service" ];
+    systemd.services."lk-jwt-service".after = mkIf cfg.matrix.elementCall
+      [ "matrix-synapse-livekit-key-generator.service" ];
+    systemd.services."lk-jwt-service".requires = mkIf cfg.matrix.elementCall
+      [ "matrix-synapse-livekit-key-generator.service" ];
 
     systemd.services.matrix-synapse.serviceConfig.SupplementaryGroups =
       # remove after https://github.com/NixOS/nixpkgs/pull/311681/files
@@ -234,6 +294,27 @@ in {
         "admin";
       settings.bridge.encryption.allow = true;
       settings.bridge.encryption.default = true;
+    };
+
+    services.livekit = mkIf cfg.matrix.elementCall {
+      enable = true;
+      openFirewall = true;
+      keyFile = livekitKeyFile;
+      settings = {
+        port = 7880;
+        room.auto_create = false;
+        rtc = {
+          port_range_start = 50000;
+          port_range_end = 51000;
+        };
+      };
+    };
+
+    services.lk-jwt-service = mkIf cfg.matrix.elementCall {
+      enable = true;
+      keyFile = livekitKeyFile;
+      livekitUrl = "wss://${domain}/livekit/sfu";
+      port = 8120;
     };
 
     eilean.turn.enable = mkIf cfg.matrix.turn true;
