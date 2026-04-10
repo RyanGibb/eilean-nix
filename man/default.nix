@@ -10,7 +10,7 @@ let
   optionsDoc =
     let
       eval = import (pkgs.path + "/nixos/lib/eval-config.nix") {
-        inherit system;
+        localSystem = system;
         modules = [
           ../modules/default.nix
           nixos-mailserver
