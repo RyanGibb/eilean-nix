@@ -22,8 +22,14 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
-          manpage = import ./man { inherit pkgs system nixos-mailserver eon; };
-          packages.mautrix-meta = (pkgs.callPackage ./pkgs/mautrix-meta.nix { });
+          manpage = import ./man {
+            inherit
+              pkgs
+              system
+              nixos-mailserver
+              eon
+              ;
+          };
         }
       );
 
@@ -42,7 +48,10 @@
           }
         ];
       };
-      defaultTemplate.path = ./template;
+      templates.default = {
+        path = ./template;
+        description = "Eilean server configuration template";
+      };
 
       formatter = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed (
         system: nixpkgs.legacyPackages.${system}.nixfmt
