@@ -55,7 +55,7 @@ lib.mkIf (cfg.enable && cfg.server == "eon") {
       ops =
         let
           mapZones = zonename: zone: ''
-            for f in ${config.mailserver.dkimKeyDirectory}/${zonename}.*.txt; do
+            for f in ${config.mailserver.dkim.keyDirectory}/${zonename}.*.txt; do
               update $f ${zonename}
             done
           '';

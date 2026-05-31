@@ -2,6 +2,7 @@
   pkgs,
   system,
   nixos-mailserver,
+  eon,
   ...
 }:
 
@@ -10,10 +11,13 @@ let
   optionsDoc =
     let
       eval = import (pkgs.path + "/nixos/lib/eval-config.nix") {
-        localSystem = system;
+        inherit system;
         modules = [
+          { nixpkgs.hostPlatform = system; }
           ../modules/default.nix
-          nixos-mailserver
+          nixos-mailserver.nixosModule
+          eon.nixosModules.default
+          eon.nixosModules.acme
         ];
       };
     in

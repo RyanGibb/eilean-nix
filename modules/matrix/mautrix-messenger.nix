@@ -50,13 +50,13 @@ in
 {
   options.services.mautrix-messenger = {
     enable = lib.mkEnableOption (
-      lib.mdDoc "mautrix-messenger, a puppeting/relaybot bridge between Matrix and Messenger."
+      "mautrix-messenger, a puppeting/relaybot bridge between Matrix and Messenger."
     );
 
     settings = lib.mkOption {
       type = settingsFormat.type;
       default = defaultConfig;
-      description = lib.mdDoc ''
+      description = ''
         {file}`config.yaml` configuration as a Nix attribute set.
         Configuration options should match those described in
         [example-config.yaml](https://github.com/mautrix/messenger/blob/master/example-config.yaml).
@@ -97,7 +97,7 @@ in
       defaultText = lib.literalExpression ''
         optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnits
       '';
-      description = lib.mdDoc ''
+      description = ''
         List of Systemd services to require and wait for when starting the application service.
       '';
     };

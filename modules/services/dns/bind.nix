@@ -54,7 +54,7 @@ lib.mkIf (cfg.enable && cfg.server == "bind") {
             ''
               if ! diff ${zonefile} ${path} > /dev/null; then
                 cp ${zonefile} ${path}
-                cat ${config.mailserver.dkimKeyDirectory}/*.txt >> ${path}
+                cat ${config.mailserver.dkim.keyDirectory}/*.txt >> ${path}
                 # remove journal file to avoid 'journal out of sync with zone'
                 # NB this will reset dynamic updates
                 rm -f ${path}.signed.jnl

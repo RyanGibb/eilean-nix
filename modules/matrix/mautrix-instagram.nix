@@ -50,13 +50,13 @@ in
 {
   options.services.mautrix-instagram = {
     enable = lib.mkEnableOption (
-      lib.mdDoc "mautrix-instagram, a puppeting/relaybot bridge between Matrix and Instagram."
+      "mautrix-instagram, a puppeting/relaybot bridge between Matrix and Instagram."
     );
 
     settings = lib.mkOption {
       type = settingsFormat.type;
       default = defaultConfig;
-      description = lib.mdDoc ''
+      description = ''
         {file}`config.yaml` configuration as a Nix attribute set.
         Configuration options should match those described in
         [example-config.yaml](https://github.com/mautrix/instagram/blob/master/example-config.yaml).
@@ -97,7 +97,7 @@ in
       defaultText = lib.literalExpression ''
         optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnits
       '';
-      description = lib.mdDoc ''
+      description = ''
         List of Systemd services to require and wait for when starting the application service.
       '';
     };

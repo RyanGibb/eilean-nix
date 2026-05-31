@@ -33,7 +33,7 @@ in
       enable = true;
       fqdn = subdomain;
       domains = [ "${domain}" ];
-      loginAccounts = mkIf (cfg.gitea.enable || cfg.mastodon.enable) {
+      accounts = mkIf (cfg.gitea.enable || cfg.mastodon.enable) {
         "system@${domain}" = {
           passwordFile = cfg.mailserver.systemAccountPasswordFile;
           aliases = [
@@ -43,20 +43,29 @@ in
         };
       };
 
-      # Use Let's Encrypt certificates. Note that this needs to set up a stripped
-      # down nginx and opens port 80.
-      certificateScheme = if cfg.acme-eon then "manual" else "acme-nginx";
-      certificateFile = lib.mkIf cfg.acme-eon "${
-        config.security.acme-eon.certs.${subdomain}.directory
-      }/fullchain.pem";
-      keyFile = lib.mkIf cfg.acme-eon "${config.security.acme-eon.certs.${subdomain}.directory}/key.pem";
+      # Use Let's Encrypt certificates: eon-managed certs when acme-eon is
+      # enabled, otherwise an ACME host served by the local nginx below.
+      x509 =
+        if cfg.acme-eon then
+          {
+            certificateFile = "${config.security.acme-eon.certs.${subdomain}.directory}/fullchain.pem";
+            privateKeyFile = "${config.security.acme-eon.certs.${subdomain}.directory}/key.pem";
+          }
+        else
+          {
+            useACMEHost = subdomain;
+          };
       localDnsResolver = false;
     };
 
     services.nginx.enable = true;
-    services.nginx.virtualHosts."${config.mailserver.fqdn}".extraConfig = ''
-      return 301 $scheme://${domain}$request_uri;
-    '';
+    services.nginx.virtualHosts."${config.mailserver.fqdn}" = {
+      enableACME = lib.mkIf (!cfg.acme-eon) true;
+      forceSSL = lib.mkIf (!cfg.acme-eon) true;
+      extraConfig = ''
+        return 301 $scheme://${domain}$request_uri;
+      '';
+    };
 
     systemd.services.dovecot = lib.mkIf cfg.acme-eon {
       wants = [ "acme-eon-${subdomain}.service" ];
