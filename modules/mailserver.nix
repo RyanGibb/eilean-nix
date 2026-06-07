@@ -80,8 +80,8 @@ in
     services.postfix.settings.main = {
       smtpd_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
       smtp_tls_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtpd_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
-      smtp_tls_mandatory_protocols = mkForce "TLSv1.3, !TLSv1.2, TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtpd_tls_mandatory_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
+      smtp_tls_mandatory_protocols = mkForce "TLSv1.3, TLSv1.2, !TLSv1.1, !TLSv1, !SSLv2, !SSLv3";
     };
 
     eilean.dns.enable = true;
