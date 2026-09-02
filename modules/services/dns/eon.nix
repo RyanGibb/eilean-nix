@@ -33,7 +33,7 @@ lib.mkIf (cfg.enable && cfg.server == "eon") {
   };
 
   users.users = {
-    eon.extraGroups = [ config.services.opendkim.group ];
+    eon.extraGroups = [ config.services.rspamd.group ];
   };
 
   ### bind prestart copy zonefiles

@@ -27,7 +27,7 @@ lib.mkIf (cfg.enable && cfg.server == "bind") {
   };
 
   users.users = {
-    named.extraGroups = [ config.services.opendkim.group ];
+    named.extraGroups = [ config.services.rspamd.group ];
   };
 
   ### bind prestart copy zonefiles
